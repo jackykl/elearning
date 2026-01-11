@@ -789,8 +789,14 @@
     #password-setup-screen,
     #loading-screen,
     #error-screen {
-      padding-bottom: 80px;
+      padding-bottom: 120px !important; /* 增加底部間距，確保按鈕不被版權資訊覆蓋 */
       min-height: calc(100vh - 80px);
+      box-sizing: border-box;
+    }
+    
+    /* 結果頁面按鈕區域額外保護 */
+    #result-screen ion-button:last-of-type {
+      margin-bottom: 20px;
     }
     
     /* 登入頁面特殊處理，確保錯誤信息不被版權信息覆蓋 */
