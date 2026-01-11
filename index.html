@@ -784,7 +784,20 @@
       max-height: calc(100vh - 80px);
     }
 
-    #result-screen,
+    #result-screen {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: calc(100vh - 80px) !important; /* 減去版權資訊高度，與 quiz-screen 相同 */
+      min-height: calc(100vh - 80px) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    
     #name-input-screen,
     #password-setup-screen,
     #loading-screen,
@@ -794,31 +807,13 @@
       box-sizing: border-box;
     }
     
-    /* 結果頁面按鈕區域額外保護 */
-    #result-screen ion-button:last-of-type {
-      margin-bottom: 20px;
+    /* 結果頁面內容區域，與 quiz-screen 相同 */
+    #result-screen {
+      padding: 20px;
     }
     
-    /* 手機版結果頁面特殊處理 */
-    @media (max-width: 768px) {
-      #result-screen {
-        padding-bottom: 180px !important; /* 手機版需要更多底部間距，確保按鈕完全可見 */
-        min-height: calc(100vh - 80px);
-        display: flex;
-        flex-direction: column;
-      }
-      
-      #result-screen > * {
-        flex-shrink: 0;
-      }
-      
-      #result-screen ion-button {
-        margin-bottom: 15px !important;
-      }
-      
-      #result-screen ion-button:last-of-type {
-        margin-bottom: 50px !important; /* 最後一個按鈕需要更多間距，確保不被版權資訊覆蓋 */
-      }
+    #result-screen > * {
+      flex-shrink: 0;
     }
     
     /* 登入頁面特殊處理，確保錯誤信息不被版權信息覆蓋 */
@@ -1099,8 +1094,8 @@
         <!-- 4. 結果畫面 -->
         <div id="result-screen" class="hidden ion-text-center">
           <!-- 頂部返回按鈕 -->
-          <div style="margin-bottom: 20px; text-align: left;">
-            <ion-button fill="outline" size="default" onclick="backToPracticeSelect()">
+          <div style="margin-bottom: 20px; text-align: left; padding-bottom: 10px;">
+            <ion-button fill="outline" size="default" onclick="backToPracticeSelect()" style="margin-bottom: 0;">
               <ion-icon slot="start" name="arrow-back"></ion-icon>
               返回練習目錄
             </ion-button>
@@ -1127,7 +1122,7 @@
             <ion-icon slot="start" name="refresh"></ion-icon>
             重新挑戰
           </ion-button>
-          <ion-button expand="block" fill="outline" size="large" class="ion-margin-top" onclick="backToPracticeSelect()" style="margin-bottom: 30px !important;">
+          <ion-button expand="block" fill="outline" size="large" class="ion-margin-top" onclick="backToPracticeSelect()" style="margin-bottom: 100px !important;">
             <ion-icon slot="start" name="list"></ion-icon>
             返回練習目錄
           </ion-button>
