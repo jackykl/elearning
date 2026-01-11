@@ -799,6 +799,28 @@
       margin-bottom: 20px;
     }
     
+    /* 手機版結果頁面特殊處理 */
+    @media (max-width: 768px) {
+      #result-screen {
+        padding-bottom: 180px !important; /* 手機版需要更多底部間距，確保按鈕完全可見 */
+        min-height: calc(100vh - 80px);
+        display: flex;
+        flex-direction: column;
+      }
+      
+      #result-screen > * {
+        flex-shrink: 0;
+      }
+      
+      #result-screen ion-button {
+        margin-bottom: 15px !important;
+      }
+      
+      #result-screen ion-button:last-of-type {
+        margin-bottom: 50px !important; /* 最後一個按鈕需要更多間距，確保不被版權資訊覆蓋 */
+      }
+    }
+    
     /* 登入頁面特殊處理，確保錯誤信息不被版權信息覆蓋 */
     #password-login-screen {
       padding-bottom: 120px !important;
@@ -1105,7 +1127,7 @@
             <ion-icon slot="start" name="refresh"></ion-icon>
             重新挑戰
           </ion-button>
-          <ion-button expand="block" fill="outline" size="large" class="ion-margin-top" onclick="backToPracticeSelect()">
+          <ion-button expand="block" fill="outline" size="large" class="ion-margin-top" onclick="backToPracticeSelect()" style="margin-bottom: 30px !important;">
             <ion-icon slot="start" name="list"></ion-icon>
             返回練習目錄
           </ion-button>
