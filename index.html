@@ -1,0 +1,3466 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; img-src 'self' data: https: https://cdn.jsdelivr.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://docs.google.com https://*.googleusercontent.com https://cdn.jsdelivr.net; frame-src 'none'; object-src 'none'; base-uri 'self'; worker-src 'self' blob:; child-src 'self' blob:;">
+  <meta name="referrer" content="no-referrer">
+  <title>線上學習平台</title>
+
+  <!-- 引入 Ionic 的核心 CSS 和 JS (CDN) -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+
+  <style>
+    /* 全局高度設置 - 確保充分利用視口高度 */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    ion-app {
+      height: 100vh;
+    }
+
+    ion-content {
+      height: 100%;
+      --padding-top: 0;
+      --padding-bottom: 0; /* 不需要 padding，因為版權資訊是 fixed 定位，內容高度已計算 */
+    }
+
+    /* 自定義樣式調整 */
+    :root {
+      --ion-color-primary: #3b82f6; /* 類似 Tailwind 的 Blue-500 */
+      --ion-background-color: #f3f4f6;
+    }
+
+    .quiz-container {
+      max-width: 600px;
+      margin: 0 auto;
+      height: 100%;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 練習選擇畫面時，容器需要充分利用高度 */
+    #practice-select-screen .quiz-container {
+      height: 100vh !important;
+      min-height: 100vh !important;
+    }
+
+    /* 當顯示練習選擇畫面或測驗畫面時，移除容器寬度限制 */
+    .quiz-container:has(#practice-select-screen:not(.hidden)),
+    .quiz-container:has(#quiz-screen:not(.hidden)) {
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+
+    /* 練習選擇畫面時移除寬度限制並充分利用高度 */
+    #practice-select-screen {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: calc(100vh - 80px) !important; /* 減去版權資訊高度 */
+      min-height: calc(100vh - 80px) !important;
+      max-height: calc(100vh - 80px) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* 測驗畫面時移除寬度限制並充分利用高度 */
+    #quiz-screen {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: calc(100vh - 80px) !important; /* 減去版權資訊高度 */
+      min-height: calc(100vh - 80px) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* 選項按鈕樣式 */
+    .option-card {
+      margin: 10px 0;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    /* 選中狀態 */
+    .option-card.selected {
+      border-color: var(--ion-color-primary);
+      background-color: #eff6ff;
+    }
+
+    /* 正確答案樣式 */
+    .option-card.correct {
+      border-color: var(--ion-color-success);
+      background-color: #f0fdf4;
+      color: var(--ion-color-success-shade);
+    }
+
+    /* 錯誤答案樣式 */
+    .option-card.wrong {
+      border-color: var(--ion-color-danger);
+      background-color: #fef2f2;
+      color: var(--ion-color-danger-shade);
+    }
+
+    /* 隱藏區塊 */
+    .hidden {
+      display: none !important;
+    }
+
+    /* 解析區塊動畫 */
+    #feedback-area {
+      transition: opacity 0.3s ease-in;
+      margin: 20px 0 !important;
+      min-height: 60px; /* 確保有足夠高度 */
+      flex-shrink: 0; /* 防止被壓縮 */
+    }
+
+    /* 確保反饋區域顯示時可見 */
+    #feedback-area:not(.hidden) {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    /* 確保反饋文本可見 */
+    #feedback-text {
+      display: block !important;
+      min-height: 1.5em;
+      white-space: pre-wrap; /* 允許換行 */
+      word-wrap: break-word; /* 長單詞換行 */
+      overflow-wrap: break-word;
+      padding: 8px 0; /* 增加內邊距 */
+      line-height: 1.6; /* 增加行高，提高可讀性 */
+      max-height: none !important; /* 不限制最大高度 */
+      overflow: visible !important; /* 確保內容可見 */
+    }
+
+    /* 確保反饋區域內容不被壓縮 */
+    #feedback-area ion-card-content {
+      padding: 16px !important;
+      min-height: 50px;
+    }
+    
+    /* 確保問題文字區域有足夠空間，不被壓縮，且始終可見 */
+    #question-text {
+      flex-shrink: 0 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      line-height: 1.6 !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      white-space: normal !important;
+      min-height: 2em !important;
+      padding: 10px 0 !important;
+      overflow: visible !important;
+      max-height: none !important;
+    }
+    
+    /* 確保問題卡片始終可見且不被壓縮 */
+    ion-card:has(#question-text) {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      flex-shrink: 0 !important;
+      overflow: visible !important;
+    }
+
+    /* 練習選擇卡片樣式 */
+    .practice-card {
+      margin: 10px 0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .practice-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* 密碼輸入區域 */
+    .password-container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* 防止文本選擇（測驗內容保護） */
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* 水印樣式 */
+    .watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 3rem;
+      color: rgba(0, 0, 0, 0.05);
+      pointer-events: none;
+      z-index: 9999;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+
+    /* 禁止選擇的覆蓋層 */
+    body.no-select {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    /* 練習選擇畫面布局 - 充分利用屏幕寬度和高度 */
+    .practice-select-layout {
+      display: flex;
+      gap: 20px;
+      height: calc(100vh - 80px); /* 減去版權資訊高度 */
+      min-height: calc(100vh - 80px);
+      max-height: calc(100vh - 80px);
+      padding: 20px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .practice-sidebar {
+      flex: 0 0 320px;
+      min-width: 280px;
+      max-width: 380px;
+      border-right: 2px solid #e0e0e0;
+      padding-right: 20px;
+      overflow-y: auto;
+      height: 100%;
+      max-height: 100%;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .leaderboard-main {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-left: 20px;
+      padding-right: 20px; /* 為滾動條預留空間，避免內容被遮擋 */
+      padding-bottom: 0; /* 移除底部內邊距，因為已經在 layout 層面處理 */
+      height: 100%;
+      max-height: 100%;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      flex-grow: 1;
+      /* 使用 overlay 滾動條，不占用內容空間 */
+      scrollbar-gutter: stable;
+    }
+    
+    /* 自定義滾動條樣式，使其不占用內容空間（WebKit 瀏覽器） */
+    .leaderboard-main::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .leaderboard-main::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .leaderboard-main::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+    }
+    
+    .leaderboard-main::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    /* 側邊欄練習卡片樣式優化 */
+    .practice-sidebar .practice-card {
+      margin-bottom: 12px;
+    }
+
+    .practice-sidebar .practice-card ion-card-content {
+      padding: 12px;
+    }
+
+    /* 排行榜主內容區域樣式 */
+    .leaderboard-main {
+      width: 100%;
+    }
+
+    .leaderboard-main h2 {
+      color: #1f2937;
+      font-weight: 600;
+      margin-bottom: 25px;
+    }
+
+    .leaderboard-main #leaderboard-container {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+      align-items: start;
+      overflow: visible; /* 允許內容完整顯示 */
+      padding-bottom: 10px; /* 添加底部間距，確保最後一行卡片不被剪裁 */
+      padding-right: 0; /* 不需要額外右側 padding，已在 .leaderboard-main 中處理 */
+      box-sizing: border-box;
+    }
+
+    .leaderboard-main .ion-card {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 0;
+      max-height: none; /* 移除最大高度限制，允許內容完整顯示 */
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      overflow: visible; /* 改為 visible，允許內容完整顯示 */
+      aspect-ratio: auto; /* 移除固定比例，允許根據內容調整 */
+      box-sizing: border-box; /* 確保寬度計算包含 padding 和 border */
+    }
+
+    .leaderboard-main .ion-card-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+      flex-shrink: 0;
+    }
+
+    .leaderboard-main .ion-card-title {
+      color: #1f2937;
+      font-weight: 600;
+      font-size: 1em;
+      padding: 12px 16px;
+    }
+
+    .leaderboard-main .ion-card-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: visible; /* 允許水平方向內容完整顯示 */
+      min-height: 0;
+      padding: 8px 12px;
+      max-height: none; /* 移除最大高度限制 */
+    }
+
+    .leaderboard-main .ion-list {
+      width: 100%;
+    }
+
+    .leaderboard-main .ion-item {
+      width: 100%;
+    }
+
+    /* 響應式設計 - 排行榜網格 */
+    @media (max-width: 1400px) {
+      .leaderboard-main #leaderboard-container {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      }
+    }
+
+    @media (max-width: 1000px) {
+      .leaderboard-main #leaderboard-container {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .leaderboard-main #leaderboard-container {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      
+      .leaderboard-main .ion-card {
+        max-height: none;
+        min-height: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .leaderboard-main #leaderboard-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 手機版側邊菜單樣式 */
+    .mobile-menu-toggle {
+      display: none; /* 默認隱藏，只在手機版顯示 */
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1001;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .menu-overlay {
+      display: none; /* 默認隱藏 */
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .menu-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+    
+    .mobile-menu-header {
+      display: none; /* 默認隱藏，只在手機版顯示 */
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 15px;
+    }
+    
+    .mobile-menu-close {
+      display: none; /* 默認隱藏，只在手機版顯示 */
+    }
+
+    /* 響應式設計 - 手機版側邊菜單 */
+    @media (max-width: 768px) {
+      .mobile-menu-toggle {
+        display: block; /* 手機版顯示菜單按鈕 */
+      }
+      
+      .practice-select-layout {
+        flex-direction: row; /* 保持橫向布局，但側邊欄會隱藏 */
+        padding: 15px;
+        height: 100%;
+        min-height: 100%;
+        position: relative;
+      }
+
+      .practice-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%; /* 默認隱藏在左側 */
+        width: 280px;
+        max-width: 85vw; /* 最大寬度為視口寬度的85% */
+        height: calc(100vh - 80px); /* 減去版權資訊高度 */
+        max-height: calc(100vh - 80px);
+        background: white;
+        z-index: 1000;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+        transition: left 0.3s ease;
+        border-right: 2px solid #e0e0e0;
+        padding: 0; /* 移除 padding，改為內部元素控制 */
+        overflow: hidden; /* 改為 hidden，讓內部元素控制滾動 */
+        flex: none;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* 手機版練習目錄側邊欄內容區域布局 */
+      .practice-sidebar .mobile-menu-header {
+        padding: 15px 20px;
+        flex-shrink: 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      
+      .practice-sidebar > div:not(.mobile-menu-header):not(#practice-list) {
+        padding: 15px 20px 0 20px;
+        flex-shrink: 0;
+      }
+      
+      .practice-sidebar #practice-list {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+        padding: 15px 20px; /* 左右和上下添加 padding */
+        max-height: none !important; /* 移除最大高度限制，充分利用空間 */
+      }
+      
+      /* 登出按鈕區域 */
+      .practice-sidebar > ion-button {
+        padding: 15px 20px 20px 20px;
+        flex-shrink: 0;
+        margin: 0;
+        margin-top: auto; /* 推到底部 */
+      }
+      
+      .practice-sidebar.menu-open {
+        left: 0; /* 打開時顯示 */
+      }
+      
+      .mobile-menu-header {
+        display: flex; /* 手機版顯示菜單標題和關閉按鈕 */
+      }
+      
+      .mobile-menu-close {
+        display: block; /* 手機版顯示關閉按鈕 */
+      }
+
+      .leaderboard-main {
+        padding-left: 15px;
+        padding-right: 15px;
+        height: auto;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        width: 100%;
+      }
+      
+      /* 測驗畫面的側邊欄 */
+      .quiz-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%; /* 默認隱藏在左側 */
+        width: 280px;
+        max-width: 85vw;
+        height: calc(100vh - 80px); /* 減去版權資訊高度 */
+        max-height: calc(100vh - 80px);
+        background: white;
+        z-index: 1000;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+        transition: left 0.3s ease;
+        border-right: 2px solid #e0e0e0;
+        padding: 0; /* 移除 padding，改為內部元素控制 */
+        overflow: hidden; /* 改為 hidden，讓內部元素控制滾動 */
+        flex: none;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* 手機版側邊欄內容區域布局 */
+      .quiz-sidebar .mobile-menu-header {
+        padding: 15px 20px;
+        flex-shrink: 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      
+      .quiz-sidebar > div:not(.mobile-menu-header):not(#question-list) {
+        padding: 15px 20px 0 20px;
+        flex-shrink: 0;
+      }
+      
+      .quiz-sidebar #question-list {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+        padding: 15px 20px; /* 左右和上下添加 padding，與練習目錄一致 */
+        max-height: none !important; /* 移除最大高度限制，充分利用空間 */
+      }
+      
+      .quiz-sidebar.menu-open {
+        left: 0 !important; /* 打開時顯示 */
+      }
+      
+      /* 確保 menu-open 狀態下題目列表正確顯示 */
+      .quiz-sidebar.menu-open #question-list {
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      
+      .quiz-layout {
+        flex-direction: row; /* 保持橫向布局 */
+        padding: 15px;
+      }
+      
+      .quiz-main {
+        padding-left: 15px;
+        padding-right: 15px;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .practice-select-layout {
+        padding: 10px;
+      }
+
+      .practice-sidebar {
+        flex: 0 0 auto;
+        min-width: 100%;
+      }
+    }
+
+    /* 測驗畫面布局 */
+    .quiz-layout {
+      display: flex;
+      gap: 20px;
+      height: 100%;
+      min-height: 100%;
+      padding: 20px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    /* 確保測驗畫面充分利用寬度 */
+    #quiz-screen .quiz-layout {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    /* 桌面版測驗側邊欄樣式 */
+    @media (min-width: 769px) {
+      .quiz-sidebar {
+        flex: 0 0 280px;
+        min-width: 250px;
+        max-width: 320px;
+        border-right: 2px solid #e0e0e0;
+        padding-right: 20px;
+        overflow-y: auto;
+        height: 100%;
+        flex-shrink: 0;
+      }
+    }
+
+    .quiz-main {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-left: 20px;
+      padding-bottom: 20px; /* 適當的底部間距 */
+      height: 100%;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      /* 確保內容區域充分利用寬度 */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 確保選項區域和反饋區域有足夠空間，不被壓縮 */
+    #options-container {
+      flex-shrink: 0;
+      margin-bottom: 10px;
+    }
+
+    /* 確保反饋區域有足夠空間顯示，不被按鈕壓縮 */
+    #feedback-area {
+      flex-shrink: 0 !important;
+      margin: 20px 0 !important;
+    }
+
+    /* 測驗內容區域的最大寬度限制（可選，如果需要可以調整） */
+    .quiz-main > * {
+      max-width: 100%;
+    }
+
+    /* 確保選項區域和反饋區域有足夠空間，不被壓縮 */
+    #options-container {
+      flex-shrink: 0;
+      margin-bottom: 10px;
+    }
+
+    /* 確保反饋區域有足夠空間顯示，不被按鈕壓縮 */
+    #feedback-area {
+      flex-shrink: 0 !important;
+      margin: 20px 0 !important;
+    }
+
+    /* 題目目錄樣式 */
+    #question-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .question-item {
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+      background-color: #f8f9fa;
+    }
+
+    .question-item:hover {
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+    }
+
+    .question-item.current {
+      background-color: #eff6ff;
+      border-color: var(--ion-color-primary);
+      font-weight: 600;
+      color: var(--ion-color-primary);
+    }
+
+    .question-item.answered {
+      background-color: #f0fdf4;
+      border-color: #86efac;
+    }
+
+    .question-item.answered.wrong {
+      background-color: #fef2f2;
+      border-color: #fca5a5;
+    }
+
+    .question-item-number {
+      font-weight: 600;
+      margin-right: 8px;
+      color: #666;
+    }
+
+    .question-item.current .question-item-number {
+      color: var(--ion-color-primary);
+    }
+
+    /* 響應式設計 - 測驗畫面（手機版樣式已在上面統一處理） */
+    @media (max-width: 768px) {
+      .quiz-layout {
+        flex-direction: row; /* 保持橫向布局，側邊欄會以固定定位顯示 */
+        padding: 15px;
+      }
+
+      .quiz-main {
+        padding-left: 15px;
+        padding-right: 15px;
+        width: 100%;
+      }
+    }
+
+    /* 版權資訊樣式 */
+    .copyright-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-top: 1px solid #e0e0e0;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 0.75em;
+      color: #666;
+      z-index: 1000;
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .copyright-footer p {
+      margin: 4px 0;
+      line-height: 1.4;
+    }
+
+    /* 確保內容不被版權資訊遮擋 */
+    .quiz-container {
+      padding-bottom: 80px;
+      min-height: calc(100vh - 80px);
+    }
+
+    #practice-select-screen {
+      padding-bottom: 0; /* 不需要額外 padding，高度已在上面計算 */
+      min-height: calc(100vh - 80px);
+      max-height: calc(100vh - 80px);
+    }
+
+    #result-screen,
+    #name-input-screen,
+    #password-setup-screen,
+    #loading-screen,
+    #error-screen {
+      padding-bottom: 80px;
+      min-height: calc(100vh - 80px);
+    }
+    
+    /* 登入頁面特殊處理，確保錯誤信息不被版權信息覆蓋 */
+    #password-login-screen {
+      padding-bottom: 120px !important;
+      min-height: calc(100vh - 80px) !important;
+    }
+    
+    #password-login-screen .password-container {
+      margin-bottom: 100px;
+      padding-bottom: 20px;
+    }
+    
+    #login-error {
+      min-height: 2em;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.5;
+    }
+
+    /* 練習選擇畫面布局已在上面的 .practice-select-layout 中處理高度，不需要額外 padding */
+
+    /* 測驗畫面布局調整 */
+    #quiz-screen .quiz-layout {
+      height: 100% !important;
+      padding-bottom: 20px;
+      overflow-y: auto; /* 允許垂直滾動 */
+    }
+    
+    /* 確保測驗畫面內容可以正常顯示 */
+    #quiz-screen .quiz-main {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <ion-app>
+    <ion-content class="ion-padding">
+      <div class="quiz-container">
+
+        <!-- 1. 密碼設置畫面 -->
+        <div id="password-setup-screen" class="hidden">
+          <div class="password-container" style="margin-top: 30%;">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title class="ion-text-center">
+                  <ion-icon name="lock-closed" style="font-size: 48px; color: var(--ion-color-primary);"></ion-icon>
+                  <h2>設置密碼</h2>
+                </ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-item>
+                  <ion-label position="stacked">請輸入新密碼</ion-label>
+                  <ion-input id="setup-password-input" type="password" placeholder="密碼"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">確認密碼</ion-label>
+                  <ion-input id="setup-confirm-input" type="password" placeholder="再次輸入密碼"></ion-input>
+                </ion-item>
+                <ion-button expand="block" size="large" class="ion-margin-top" onclick="setupPassword()">
+                  設置密碼
+                </ion-button>
+                <p id="setup-error" style="color: var(--ion-color-danger); text-align: center; margin-top: 10px; font-size: 0.9em;"></p>
+              </ion-card-content>
+            </ion-card>
+          </div>
+        </div>
+
+        <!-- 2. 密碼登入畫面 -->
+        <div id="password-login-screen" class="hidden">
+          <div class="password-container" style="margin-top: 15%; margin-bottom: 100px; padding-bottom: 20px;">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title class="ion-text-center">
+                  <ion-icon name="lock-closed" style="font-size: 48px; color: var(--ion-color-primary);"></ion-icon>
+                  <h2>線上學習平台</h2>
+                </ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-item>
+                  <ion-label position="stacked">課程編號</ion-label>
+                  <ion-input id="login-course-code-input" type="text" placeholder="請輸入課程編號" autocomplete="off"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">密碼</ion-label>
+                  <ion-input id="login-password-input" type="password" placeholder="請輸入密碼"></ion-input>
+                </ion-item>
+                <ion-button expand="block" size="large" class="ion-margin-top" onclick="login()">
+                  登入
+                </ion-button>
+                <p style="text-align: center; margin-top: 10px; font-size: 0.85em; color: #666;">
+                  請向老師索取課程編號和密碼
+                </p>
+                <p id="login-error" style="color: var(--ion-color-danger); text-align: center; margin-top: 10px; margin-bottom: 20px; font-size: 0.9em; min-height: 1.5em; padding-bottom: 10px;"></p>
+              </ion-card-content>
+            </ion-card>
+          </div>
+        </div>
+
+        <!-- 3. 練習選擇畫面 -->
+        <div id="practice-select-screen" class="hidden">
+          <!-- 手機版菜單按鈕 -->
+          <div class="mobile-menu-toggle" onclick="togglePracticeMenu()">
+            <ion-button fill="clear" size="default">
+              <ion-icon slot="icon-only" name="menu"></ion-icon>
+            </ion-button>
+          </div>
+          
+          <!-- 側邊菜單遮罩（手機版） -->
+          <div id="practice-menu-overlay" class="menu-overlay" onclick="closePracticeMenu()"></div>
+          
+          <div class="practice-select-layout">
+            <!-- 左側：練習目錄 -->
+            <div class="practice-sidebar" id="practice-sidebar">
+              <div class="mobile-menu-header">
+                <h2 style="margin: 0; font-size: 1.3em; flex: 1;">練習目錄</h2>
+                <ion-button fill="clear" size="small" onclick="closePracticeMenu()" class="mobile-menu-close">
+                  <ion-icon slot="icon-only" name="close"></ion-icon>
+                </ion-button>
+              </div>
+              <div class="ion-text-center" style="margin-bottom: 15px;">
+                <ion-badge color="primary" style="font-size: 0.9em; padding: 6px 12px;">
+                  課程編號: <span id="current-course-code-display">-</span>
+                </ion-badge>
+              </div>
+              <div id="practice-list">
+                <!-- 練習選項會由 JS 動態產生 -->
+              </div>
+              
+              <ion-button expand="block" fill="clear" size="small" class="ion-margin-top" onclick="logout()">
+                <ion-icon slot="start" name="log-out"></ion-icon>
+                登出
+              </ion-button>
+            </div>
+
+            <!-- 右側：排行榜主頁 -->
+            <div class="leaderboard-main">
+              <h2 style="margin-bottom: 20px; font-size: 1.5em;">得分排行榜</h2>
+              <div id="leaderboard-container">
+                <!-- 排行榜會由 JS 動態產生 -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3.5. 姓名輸入畫面 -->
+        <div id="name-input-screen" class="hidden">
+          <div class="password-container" style="margin-top: 30%;">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title class="ion-text-center">
+                  <ion-icon name="person" style="font-size: 48px; color: var(--ion-color-primary);"></ion-icon>
+                  <h2>請輸入您的姓名</h2>
+                </ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <ion-item>
+                  <ion-label position="stacked">姓名</ion-label>
+                  <ion-input id="student-name-input" type="text" placeholder="請輸入您的姓名" autocomplete="off"></ion-input>
+                </ion-item>
+                <p style="text-align: center; margin-top: 10px; font-size: 0.85em; color: #666;">
+                  此姓名將用於記錄您的得分
+                </p>
+                <ion-button expand="block" size="large" class="ion-margin-top" onclick="startPracticeWithName()">
+                  開始練習
+                </ion-button>
+                <ion-button expand="block" fill="outline" size="small" class="ion-margin-top" onclick="backToPracticeSelect()">
+                  返回練習選擇
+                </ion-button>
+                <p id="name-input-error" style="color: var(--ion-color-danger); text-align: center; margin-top: 10px; font-size: 0.9em;"></p>
+              </ion-card-content>
+            </ion-card>
+          </div>
+        </div>
+
+        <!-- 4. 載入畫面 -->
+        <div id="loading-screen" class="ion-text-center" style="margin-top: 50%;">
+          <ion-spinner name="crescent" color="primary" style="transform: scale(1.5);"></ion-spinner>
+          <p class="ion-margin-top text-gray-500">正在載入題庫...</p>
+        </div>
+
+        <!-- 5. 錯誤畫面 -->
+        <div id="error-screen" class="hidden ion-text-center" style="margin-top: 40%;">
+          <ion-icon name="warning-outline" color="danger" style="font-size: 64px;"></ion-icon>
+          <h2>發生錯誤</h2>
+          <p id="error-message">無法讀取資料</p>
+          <ion-button expand="block" onclick="location.reload()">重新整理</ion-button>
+        </div>
+
+        <!-- 3. 測驗主畫面 -->
+        <div id="quiz-screen" class="hidden">
+          <!-- 手機版菜單按鈕 -->
+          <div class="mobile-menu-toggle" onclick="toggleQuizMenu()">
+            <ion-button fill="clear" size="default">
+              <ion-icon slot="icon-only" name="menu"></ion-icon>
+            </ion-button>
+          </div>
+          
+          <!-- 側邊菜單遮罩（手機版） -->
+          <div id="quiz-menu-overlay" class="menu-overlay" onclick="closeQuizMenu()"></div>
+          
+          <div class="quiz-layout">
+            <!-- 左側：題目目錄 -->
+            <div class="quiz-sidebar" id="quiz-sidebar">
+              <div class="mobile-menu-header">
+                <h3 style="margin: 0; font-size: 1.1em; font-weight: 600; color: #1f2937; flex: 1;">題目目錄</h3>
+                <ion-button fill="clear" size="small" onclick="closeQuizMenu()" class="mobile-menu-close">
+                  <ion-icon slot="icon-only" name="close"></ion-icon>
+                </ion-button>
+              </div>
+              <div style="margin-bottom: 15px; flex-shrink: 0;">
+                <ion-button size="small" fill="outline" expand="block" onclick="backToPracticeSelectFromQuiz()">
+                  <ion-icon slot="start" name="arrow-back"></ion-icon>
+                  返回練習目錄
+                </ion-button>
+              </div>
+              <div id="question-list">
+                <!-- 題目列表會由 JS 動態產生 -->
+              </div>
+            </div>
+
+            <!-- 右側：測驗內容 -->
+            <div class="quiz-main">
+              <!-- 練習名稱 -->
+              <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
+                <h2 id="practice-name-display" style="margin: 0; font-size: 1.5em; font-weight: 600; color: #1f2937;">
+                  練習載入中...
+                </h2>
+              </div>
+
+              <!-- 進度條與標題 -->
+              <div class="ion-margin-bottom">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                  <span style="color: #666; font-size: 0.9em;">Question <span id="q-current">1</span> / <span id="q-total">10</span></span>
+                  <ion-badge color="primary">練習中</ion-badge>
+                </div>
+                <ion-progress-bar id="progress-bar" value="0"></ion-progress-bar>
+              </div>
+
+              <!-- 題目卡片 -->
+              <ion-card class="protected-content" style="margin: 0; box-shadow: none; background: transparent; flex-shrink: 0;">
+                <h2 id="question-text" class="protected-content" style="font-weight: bold; font-size: 1.25rem; color: #1f2937; margin-bottom: 20px; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; min-height: 2em; padding: 10px 0;">
+                  題目載入中...
+                </h2>
+              </ion-card>
+
+              <!-- 選項區域 -->
+              <div id="options-container" class="protected-content">
+                <!-- 選項會由 JS 動態產生 -->
+              </div>
+
+              <!-- 解析/回饋區域 -->
+              <ion-card id="feedback-area" class="hidden protected-content" style="margin: 20px 0 0 0; border-left: 4px solid;">
+                <ion-card-content>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <ion-icon id="feedback-icon" style="font-size: 20px;"></ion-icon>
+                    <strong id="feedback-title" style="font-size: 1.1em;"></strong>
+                  </div>
+                  <p id="feedback-text" style="color: #4b5563; line-height: 1.5;"></p>
+                </ion-card-content>
+              </ion-card>
+
+              <!-- 底部按鈕 -->
+              <div style="margin-top: 30px; flex-shrink: 0;">
+                <ion-button id="submit-btn" expand="block" size="large" disabled="true">提交答案</ion-button>
+                <ion-button id="next-btn" expand="block" size="large" color="dark" class="hidden">
+                  下一題 <ion-icon slot="end" name="arrow-forward"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. 結果畫面 -->
+        <div id="result-screen" class="hidden ion-text-center">
+          <!-- 頂部返回按鈕 -->
+          <div style="margin-bottom: 20px; text-align: left;">
+            <ion-button fill="outline" size="default" onclick="backToPracticeSelect()">
+              <ion-icon slot="start" name="arrow-back"></ion-icon>
+              返回練習目錄
+            </ion-button>
+          </div>
+          
+          <ion-card class="protected-content">
+            <ion-card-content class="ion-padding-vertical protected-content">
+              <p id="student-name-display" class="protected-content" style="font-size: 1.1em; color: #666; margin-bottom: 10px;"></p>
+              <ion-icon id="result-icon" style="font-size: 80px; margin-bottom: 10px;"></ion-icon>
+              <h1 id="final-score" class="protected-content" style="font-size: 3rem; font-weight: bold; margin: 0;">0</h1>
+              <p class="protected-content">分</p>
+              <p id="result-msg" class="protected-content" style="font-size: 1.2rem; margin-top: 10px;"></p>
+            </ion-card-content>
+          </ion-card>
+
+          <div class="ion-text-left ion-margin-top protected-content">
+            <h3 class="protected-content">答題紀錄</h3>
+            <ion-list id="history-list" class="protected-content" lines="full">
+              <!-- 歷史紀錄由 JS 產生 -->
+            </ion-list>
+          </div>
+
+          <ion-button expand="block" size="large" class="ion-margin-top" onclick="restartQuiz()">
+            <ion-icon slot="start" name="refresh"></ion-icon>
+            重新挑戰
+          </ion-button>
+          <ion-button expand="block" fill="outline" size="large" class="ion-margin-top" onclick="backToPracticeSelect()">
+            <ion-icon slot="start" name="list"></ion-icon>
+            返回練習目錄
+          </ion-button>
+        </div>
+
+      </div>
+    </ion-content>
+    
+    <!-- 版權資訊 -->
+    <div class="copyright-footer">
+      <p>&copy; <span id="copyright-year">2024</span> 線上學習平台. Jacky Sir 版權所有.</p>
+      <p>僅供 Jacky Sir 授權學生使用，未經許可不得複製或分享</p>
+    </div>
+  </ion-app>
+
+  <script>
+    // ==========================================
+    // 安全保護功能（防止非授權訪問和內容洩露）
+    // ==========================================
+    
+    // HTML 轉義函數（防止 XSS 攻擊）
+    function escapeHtml(text) {
+      if (typeof text !== 'string') {
+        text = String(text || '');
+      }
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+    
+    // 清理用戶輸入（移除危險字符）
+    function sanitizeInput(input) {
+      if (typeof input !== 'string') {
+        return '';
+      }
+      // 移除 HTML 標籤和危險字符
+      return input
+        .replace(/<[^>]*>/g, '') // 移除 HTML 標籤
+        .replace(/[<>\"']/g, '') // 移除危險字符
+        .trim()
+        .substring(0, 200); // 限制長度
+    }
+    
+    // 1. 防止右鍵菜單
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+
+    // 2. 防止常見的開發者工具快捷鍵
+    document.addEventListener('keydown', function(e) {
+      // 防止 F12
+      if (e.key === 'F12') {
+        e.preventDefault();
+        return false;
+      }
+      // 防止 Ctrl+Shift+I (開發者工具)
+      if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+        return false;
+      }
+      // 防止 Ctrl+Shift+J (控制台)
+      if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+        e.preventDefault();
+        return false;
+      }
+      // 防止 Ctrl+U (查看源代碼)
+      if (e.ctrlKey && e.key === 'u') {
+        e.preventDefault();
+        return false;
+      }
+      // 防止 Ctrl+S (保存網頁)
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        return false;
+      }
+      // 防止 Ctrl+P (打印)
+      if (e.ctrlKey && e.key === 'p') {
+        e.preventDefault();
+        return false;
+      }
+      // 防止 Ctrl+Shift+C (檢查元素)
+      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    // 3. 檢測開發者工具（定期檢查）
+    let devtools = {open: false, orientation: null};
+    const threshold = 160;
+    setInterval(function() {
+      if (window.outerHeight - window.innerHeight > threshold || 
+          window.outerWidth - window.innerWidth > threshold) {
+        if (!devtools.open) {
+          devtools.open = true;
+          // 記錄開發者工具檢測
+          logAccess('devtools_detected', false, '檢測到開發者工具開啟');
+          // 可以選擇：警告、清除內容、或記錄
+          console.clear();
+          console.log('%c警告！', 'color: red; font-size: 50px; font-weight: bold;');
+          console.log('%c未經授權的訪問嘗試已被記錄。', 'color: red; font-size: 20px;');
+          // 可選：清除敏感內容
+          // document.body.innerHTML = '<h1>未經授權的訪問</h1>';
+        }
+      } else {
+        devtools.open = false;
+      }
+    }, 500);
+
+    // 4. 防止文本選擇和複製（僅在測驗畫面啟用）
+    function enableContentProtection() {
+      document.body.classList.add('no-select');
+      document.body.classList.add('protected-content');
+      
+      // 防止複製
+      document.addEventListener('copy', function(e) {
+        e.clipboardData.setData('text/plain', '');
+        e.preventDefault();
+        return false;
+      });
+      
+      // 防止拖拽
+      document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+      });
+    }
+
+    function disableContentProtection() {
+      document.body.classList.remove('no-select');
+      document.body.classList.remove('protected-content');
+    }
+
+    // 5. 添加水印（在測驗和結果畫面顯示）
+    function addWatermark(text = '僅供授權學生使用') {
+      // 移除舊水印
+      const oldWatermark = document.getElementById('content-watermark');
+      if (oldWatermark) {
+        oldWatermark.remove();
+      }
+      
+      const watermark = document.createElement('div');
+      watermark.id = 'content-watermark';
+      watermark.className = 'watermark';
+      watermark.textContent = text;
+      document.body.appendChild(watermark);
+    }
+
+    function removeWatermark() {
+      const watermark = document.getElementById('content-watermark');
+      if (watermark) {
+        watermark.remove();
+      }
+    }
+
+    // 6. 防止調試（檢測調試器）
+    (function() {
+      function detectDevTools() {
+        const start = performance.now();
+        debugger;
+        const end = performance.now();
+        if (end - start > 100) {
+          // 檢測到調試器
+          console.clear();
+          console.log('%c檢測到調試工具', 'color: red; font-size: 30px;');
+        }
+      }
+      // 定期檢測（頻率較低，避免影響性能）
+      setInterval(detectDevTools, 3000);
+    })();
+
+    // 7. 防止截圖（通過添加水印和禁用某些功能）
+    // 注意：完全防止截圖在前端是不可能的，但可以增加難度
+
+    // ==========================================
+    // 設定區（老師請修改以下配置）
+    // ==========================================
+    
+    // ⚠️ 重要：請修改此密碼為您要給學生的密碼
+    // 
+    // 使用說明：
+    // 1. 將 'teacher123' 替換為您想要的密碼
+    // 2. 密碼會經過哈希處理後與學生輸入的密碼比較
+    // 3. 建議使用較複雜的密碼（至少8個字符，包含字母和數字）
+    // 4. 修改密碼後，將此文件保存並部署
+    // 5. 學生無法自行設置或修改密碼，只能輸入您設定的密碼
+    // 6. 登入狀態使用 sessionStorage，關閉瀏覽器後會自動登出
+    //
+    // ⚠️ Google Spreadsheet 配置
+    // 請設置您的 Google Apps Script Web App URL
+    // 設置步驟請參考文件底部的說明
+    // 
+    // 重要安全說明：
+    // - 所有課程密碼和有效期都存儲在 Google Spreadsheet 的 "Courses" 表中
+    // - 所有練習清單都存儲在 Google Spreadsheet 的 "Practices" 表中
+    // - 學生無法直接訪問 Spreadsheet，所有數據都通過 Google Apps Script 驗證後返回
+    // - 這樣可以防止學生通過逆向工程找到 Spreadsheet URL 並查看所有題目
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgoSW5D-r_PIk0oo7BqSK9OOD4nTj6b81rNcdmBzJnqFcUBvcXl7LbUDzvPvs8N4aypQ/exec'; // 👈 請填入您的 Google Apps Script Web App URL
+    
+    // 練習配置列表（默認列表，實際使用時會在登入時從 Google Spreadsheet 加載）
+    let PRACTICES = [
+      {
+        id: 'practice1',
+        name: 'Ionic 基礎測驗',
+        description: '測試你對 Ionic 框架的基本理解',
+        csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR6y2w2J2tO_k-X8tXQy3z5oP5o5z5o5z5o5z5o/pub?output=csv',
+        passingScore: 80,
+        courseCode: 'CS101'
+      },
+      {
+        id: 'practice2',
+        name: 'JavaScript 進階測驗',
+        description: '進階 JavaScript 概念與應用',
+        csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR6y2w2J2tO_k-X8tXQy3z5oP5o5z5o5z5o5z5o/pub?output=csv',
+        passingScore: 75,
+        courseCode: 'CS101'
+      },
+      {
+        id: 'practice3',
+        name: 'Web 開發綜合測驗',
+        description: '涵蓋 HTML、CSS、JavaScript 的綜合測驗',
+        csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR6y2w2J2tO_k-X8tXQy3z5oP5o5z5o5z5o5z5o/pub?output=csv',
+        passingScore: 70,
+        courseCode: 'CS102'
+      }
+    ];
+
+    // 存儲鍵名（使用 sessionStorage，關閉瀏覽器後失效）
+    const LOGIN_SESSION_KEY = 'quiz_app_logged_in';
+    const COURSE_CODE_KEY = 'quiz_app_course_code'; // 當前登入的課程編號
+    const PRACTICES_STORAGE_KEY = 'quiz_app_practices'; // 練習清單（與課程編號綁定）
+    const ACCESS_LOG_KEY = 'quiz_app_access_log';
+    const SCORES_STORAGE_KEY = 'quiz_app_scores'; // 學生得分記錄
+    const PRACTICE_PROGRESS_KEY = 'quiz_app_practice_progress'; // 練習進度（持久化保存）
+    const MAX_LOG_ENTRIES = 50; // 最多保存50條記錄
+
+    // ==========================================
+    // 變數初始化
+    // ==========================================
+    let questions = [];
+    let currentQIndex = 0;
+    let score = 0;
+    let selectedOptionIndex = null;
+    let isAnswered = false;
+    let historyData = [];
+    let currentPractice = null; // 當前選擇的練習
+    let PASSING_SCORE = 80; // 動態設置
+    let currentStudentName = ''; // 當前學生的姓名
+
+    // DOM 元素
+    const passwordSetupScreen = document.getElementById('password-setup-screen');
+    const passwordLoginScreen = document.getElementById('password-login-screen');
+    const practiceSelectScreen = document.getElementById('practice-select-screen');
+    const nameInputScreen = document.getElementById('name-input-screen');
+    const loadingScreen = document.getElementById('loading-screen');
+    const errorScreen = document.getElementById('error-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    
+    const qCurrentEl = document.getElementById('q-current');
+    const qTotalEl = document.getElementById('q-total');
+    const progressBar = document.getElementById('progress-bar');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackArea = document.getElementById('feedback-area');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackText = document.getElementById('feedback-text');
+    const feedbackIcon = document.getElementById('feedback-icon');
+    
+    const submitBtn = document.getElementById('submit-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    // ==========================================
+    // 邏輯函式
+    // ==========================================
+
+    // 0. 密碼管理函式（現在通過 Google Apps Script 驗證，不再使用本地密碼）
+    
+    // 檢查是否已登入（使用 sessionStorage，關閉瀏覽器後失效）
+    function isLoggedIn() {
+      return sessionStorage.getItem(LOGIN_SESSION_KEY) === 'true';
+    }
+
+    // 獲取當前課程編號
+    function getCurrentCourseCode() {
+      return sessionStorage.getItem(COURSE_CODE_KEY) || '';
+    }
+
+    // 設置登入狀態和課程編號
+    function setLoggedIn(courseCode) {
+      sessionStorage.setItem(LOGIN_SESSION_KEY, 'true');
+      sessionStorage.setItem(COURSE_CODE_KEY, courseCode);
+    }
+
+    // 保存練習清單到 sessionStorage
+    function savePracticesToStorage(practices, courseCode) {
+      try {
+        const data = {
+          courseCode: courseCode,
+          practices: practices,
+          timestamp: Date.now()
+        };
+        sessionStorage.setItem(PRACTICES_STORAGE_KEY, JSON.stringify(data));
+        console.log('練習清單已保存到 sessionStorage');
+      } catch (error) {
+        console.error('保存練習清單失敗:', error);
+      }
+    }
+
+    // 從 sessionStorage 恢復練習清單
+    function loadPracticesFromStorage(courseCode) {
+      try {
+        const stored = sessionStorage.getItem(PRACTICES_STORAGE_KEY);
+        if (!stored) {
+          return null;
+        }
+        
+        const data = JSON.parse(stored);
+        
+        // 檢查課程編號是否匹配
+        if (data.courseCode === courseCode && data.practices && Array.isArray(data.practices)) {
+          console.log('從 sessionStorage 恢復練習清單，共', data.practices.length, '個練習');
+          return data.practices;
+        } else {
+          // 課程編號不匹配，清除舊數據
+          sessionStorage.removeItem(PRACTICES_STORAGE_KEY);
+          return null;
+        }
+      } catch (error) {
+        console.error('恢復練習清單失敗:', error);
+        sessionStorage.removeItem(PRACTICES_STORAGE_KEY);
+        return null;
+      }
+    }
+
+    // 從服務器獲取最新練習清單（不需要密碼，只需要課程編號）
+    async function fetchPracticesFromServer(courseCode) {
+      try {
+        if (!GOOGLE_APPS_SCRIPT_URL) {
+          throw new Error('未設置伺服器連接');
+        }
+
+        // 確保 courseCode 存在且有效
+        if (!courseCode || courseCode.trim() === '') {
+          throw new Error('課程編號不能為空');
+        }
+
+        const urlParams = new URLSearchParams();
+        urlParams.append('action', 'getPractices');
+        urlParams.append('courseCode', courseCode.trim().toUpperCase());
+        
+        const requestUrl = `${GOOGLE_APPS_SCRIPT_URL}?${urlParams.toString()}`;
+        
+        console.log('請求練習清單 URL:', requestUrl);
+        console.log('參數:', { action: 'getPractices', courseCode: courseCode.trim().toUpperCase() });
+
+        const response = await fetch(requestUrl, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (!response.ok) {
+          throw new Error(`無法連接到服務器 (HTTP ${response.status})`);
+        }
+
+        const responseText = await response.text();
+        console.log('服務器響應:', responseText);
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('無法解析服務器響應:', parseError);
+          throw new Error('服務器返回的數據格式錯誤');
+        }
+
+        if (!data.success) {
+          // 如果服務器不支持 getPractices，返回空數組而不是拋出錯誤
+          if (data.error && data.error.includes('Invalid parameters')) {
+            console.warn('服務器不支持 getPractices 操作，使用緩存版本');
+            return null; // 返回 null 表示無法獲取，使用緩存
+          }
+          throw new Error(data.error || '獲取練習清單失敗');
+        }
+
+        if (data.practices && Array.isArray(data.practices)) {
+          console.log('從服務器獲取最新練習清單，共', data.practices.length, '個練習');
+          return data.practices;
+        } else {
+          throw new Error('服務器返回的練習清單格式錯誤');
+        }
+      } catch (error) {
+        console.error('從服務器獲取練習清單失敗:', error);
+        // 如果是參數錯誤，返回 null 而不是拋出錯誤，讓調用者使用緩存
+        if (error.message && error.message.includes('Invalid parameters')) {
+          console.warn('服務器不支持此操作，使用緩存版本');
+          return null;
+        }
+        throw error;
+      }
+    }
+
+    // 生成進度鍵（支持多個練習同時進行）
+    function getProgressKey(practiceId, studentName) {
+      return `${practiceId}_${studentName}`;
+    }
+
+    // 保存練習進度到 localStorage（支持多個練習同時進行）
+    function savePracticeProgress() {
+      try {
+        if (!currentPractice || !currentStudentName) {
+          return; // 沒有進行中的練習，不需要保存
+        }
+
+        const progress = {
+          practiceId: currentPractice.id,
+          practiceName: currentPractice.name,
+          csvUrl: currentPractice.csvUrl,
+          studentName: currentStudentName,
+          courseCode: getCurrentCourseCode(),
+          currentQIndex: currentQIndex,
+          historyData: historyData,
+          score: score,
+          timestamp: Date.now()
+        };
+
+        // 讀取所有進度
+        const allProgress = getAllPracticeProgress();
+        // 更新當前練習的進度
+        const progressKey = getProgressKey(currentPractice.id, currentStudentName);
+        allProgress[progressKey] = progress;
+        
+        // 保存所有進度
+        localStorage.setItem(PRACTICE_PROGRESS_KEY, JSON.stringify(allProgress));
+        console.log('練習進度已保存:', {
+          practiceId: progress.practiceId,
+          studentName: progress.studentName,
+          currentQIndex: progress.currentQIndex,
+          totalAnswered: progress.historyData.length
+        });
+      } catch (error) {
+        console.error('保存練習進度失敗:', error);
+      }
+    }
+
+    // 獲取所有練習進度
+    function getAllPracticeProgress() {
+      try {
+        const stored = localStorage.getItem(PRACTICE_PROGRESS_KEY);
+        if (!stored) {
+          return {};
+        }
+        return JSON.parse(stored);
+      } catch (error) {
+        console.error('讀取練習進度失敗:', error);
+        return {};
+      }
+    }
+
+    // 從 localStorage 恢復特定練習的進度
+    function loadPracticeProgress(practiceId, studentName) {
+      try {
+        const allProgress = getAllPracticeProgress();
+        if (!practiceId || !studentName) {
+          // 如果沒有指定參數，嘗試獲取當前練習的進度
+          if (currentPractice && currentStudentName) {
+            const progressKey = getProgressKey(currentPractice.id, currentStudentName);
+            return allProgress[progressKey] || null;
+          }
+          return null;
+        }
+
+        const progressKey = getProgressKey(practiceId, studentName);
+        const progress = allProgress[progressKey];
+        
+        if (!progress) {
+          return null;
+        }
+
+        // 檢查數據是否完整
+        if (!progress.practiceId || !progress.studentName || !progress.csvUrl) {
+          console.warn('練習進度數據不完整，清除舊數據');
+          clearPracticeProgress(practiceId, studentName);
+          return null;
+        }
+
+        return progress;
+      } catch (error) {
+        console.error('恢復練習進度失敗:', error);
+        return null;
+      }
+    }
+
+    // 清除特定練習的進度（如果不指定，清除當前練習的進度）
+    function clearPracticeProgress(practiceId, studentName) {
+      try {
+        if (practiceId && studentName) {
+          // 清除指定練習的進度
+          const allProgress = getAllPracticeProgress();
+          const progressKey = getProgressKey(practiceId, studentName);
+          delete allProgress[progressKey];
+          localStorage.setItem(PRACTICE_PROGRESS_KEY, JSON.stringify(allProgress));
+          console.log('練習進度已清除:', progressKey);
+        } else if (currentPractice && currentStudentName) {
+          // 清除當前練習的進度
+          const allProgress = getAllPracticeProgress();
+          const progressKey = getProgressKey(currentPractice.id, currentStudentName);
+          delete allProgress[progressKey];
+          localStorage.setItem(PRACTICE_PROGRESS_KEY, JSON.stringify(allProgress));
+          console.log('當前練習進度已清除');
+        } else {
+          // 清除所有進度（向後兼容）
+          localStorage.removeItem(PRACTICE_PROGRESS_KEY);
+          console.log('所有練習進度已清除');
+        }
+      } catch (error) {
+        console.error('清除練習進度失敗:', error);
+      }
+    }
+
+    // 獲取指定學生的所有未完成練習進度
+    function getStudentProgress(studentName) {
+      try {
+        const allProgress = getAllPracticeProgress();
+        const studentProgress = {};
+        
+        for (const [key, progress] of Object.entries(allProgress)) {
+          if (progress.studentName === studentName) {
+            studentProgress[progress.practiceId] = progress;
+          }
+        }
+        
+        return studentProgress;
+      } catch (error) {
+        console.error('獲取學生進度失敗:', error);
+        return {};
+      }
+    }
+
+    // 檢查是否有未完成的練習（檢查指定練習）
+    function hasUnfinishedPractice(practiceId, studentName) {
+      const progress = loadPracticeProgress(practiceId, studentName);
+      if (!progress) return false;
+
+      // 檢查是否與當前課程匹配
+      const courseCode = getCurrentCourseCode();
+      if (!courseCode) return false;
+
+      // 檢查練習是否還存在於當前課程中
+      const practice = PRACTICES.find(p => p.id === progress.practiceId && p.courseCode === courseCode);
+      if (!practice) {
+        // 練習不存在，清除舊進度
+        clearPracticeProgress(practiceId, studentName);
+        return false;
+      }
+
+      return true;
+    }
+
+    // 清除登入狀態
+    function clearLogin() {
+      sessionStorage.removeItem(LOGIN_SESSION_KEY);
+      sessionStorage.removeItem(COURSE_CODE_KEY);
+      sessionStorage.removeItem(PRACTICES_STORAGE_KEY);
+    }
+
+    // 訪問日誌功能
+    function logAccess(type, success = true, details = '') {
+      try {
+        const logs = JSON.parse(localStorage.getItem(ACCESS_LOG_KEY) || '[]');
+        const logEntry = {
+          timestamp: new Date().toISOString(),
+          type: type, // 'login_attempt', 'practice_start', 'devtools_detected'
+          success: success,
+          details: details,
+          userAgent: navigator.userAgent.substring(0, 100) // 限制長度
+        };
+        
+        logs.unshift(logEntry); // 添加到開頭
+        // 只保留最近的記錄
+        if (logs.length > MAX_LOG_ENTRIES) {
+          logs.splice(MAX_LOG_ENTRIES);
+        }
+        
+        localStorage.setItem(ACCESS_LOG_KEY, JSON.stringify(logs));
+      } catch (e) {
+        // 忽略日誌錯誤，不影響主要功能
+        console.error('日誌記錄失敗:', e);
+      }
+    }
+
+    function getAccessLogs() {
+      try {
+        return JSON.parse(localStorage.getItem(ACCESS_LOG_KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function clearAccessLogs() {
+      localStorage.removeItem(ACCESS_LOG_KEY);
+    }
+
+    // 得分管理函數（使用 Google Spreadsheet）
+    async function saveScore(studentName, practiceId, practiceName, score, courseCode) {
+      // 如果沒有設置 Google Apps Script URL，使用 localStorage 作為備份
+      if (!GOOGLE_APPS_SCRIPT_URL) {
+        try {
+          const scores = JSON.parse(localStorage.getItem(SCORES_STORAGE_KEY) || '[]');
+          const scoreEntry = {
+            studentName: studentName,
+            practiceId: practiceId,
+            practiceName: practiceName,
+            score: score,
+            courseCode: courseCode,
+            timestamp: new Date().toISOString()
+          };
+          
+          const existingIndex = scores.findIndex(
+            s => s.studentName === studentName && 
+                 s.practiceId === practiceId && 
+                 s.courseCode === courseCode
+          );
+          
+          if (existingIndex >= 0) {
+            if (score > scores[existingIndex].score) {
+              scores[existingIndex] = scoreEntry;
+            }
+          } else {
+            scores.push(scoreEntry);
+          }
+          
+          localStorage.setItem(SCORES_STORAGE_KEY, JSON.stringify(scores));
+        } catch (e) {
+          console.error('保存得分失敗:', e);
+        }
+        return;
+      }
+
+      // 發送到 Google Spreadsheet
+      try {
+        const scoreData = {
+          action: 'saveScore',
+          studentName: studentName,
+          practiceId: practiceId,
+          practiceName: practiceName,
+          score: score,
+          courseCode: courseCode,
+          timestamp: new Date().toISOString()
+        };
+
+        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Google Apps Script 需要 no-cors
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(scoreData)
+        });
+
+        // 注意：no-cors 模式下無法讀取響應，但數據應該已發送
+        console.log('得分已發送到資料庫');
+      } catch (e) {
+        console.error('保存得分到資料庫失敗:', e);
+        // 失敗時使用 localStorage 作為備份
+        try {
+          const scores = JSON.parse(localStorage.getItem(SCORES_STORAGE_KEY) || '[]');
+          scores.push({
+            studentName: studentName,
+            practiceId: practiceId,
+            practiceName: practiceName,
+            score: score,
+            courseCode: courseCode,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem(SCORES_STORAGE_KEY, JSON.stringify(scores));
+        } catch (backupError) {
+          console.error('備份保存也失敗:', backupError);
+        }
+      }
+    }
+
+    async function getAllScoresByCourse(courseCode) {
+      // 必須從 Google Spreadsheet 讀取
+      if (!GOOGLE_APPS_SCRIPT_URL) {
+        console.warn('未設置伺服器連接，無法從資料庫讀取得分');
+        return []; // 返回空數組，顯示「暫無得分記錄」
+      }
+
+      // 從 Google Spreadsheet 讀取
+      try {
+        const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?action=getScores&courseCode=${encodeURIComponent(courseCode)}`, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache',
+          headers: {
+            'Accept': 'application/json'
+          }
+        }).catch(fetchError => {
+          console.error('讀取得分時 Fetch 錯誤:', fetchError);
+          throw new Error(`無法連接到服務器: ${fetchError.message}`);
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => '無法讀取錯誤信息');
+          throw new Error(`HTTP 錯誤: ${response.status} - ${errorText}`);
+        }
+        
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('解析得分響應失敗:', parseError);
+          throw new Error('服務器返回的數據格式錯誤');
+        }
+        
+        if (!data.success) {
+          throw new Error(data.error || '讀取得分失敗');
+        }
+        
+        // 確保分數是數字類型，並處理可能的字符串
+        const scores = (data.scores || []).map(scoreEntry => ({
+          ...scoreEntry,
+          score: typeof scoreEntry.score === 'string' 
+            ? parseFloat(scoreEntry.score) || 0 
+            : Number(scoreEntry.score) || 0
+        }));
+        
+        return scores;
+      } catch (e) {
+        console.error('從資料庫讀取得分失敗:', e);
+        // 不返回備份數據，確保只從資料庫讀取
+        throw e; // 拋出錯誤，讓調用者處理
+      }
+    }
+
+    // 注意：已移除密碼設置功能，密碼由老師在代碼中預設
+
+    // 登入（通過 Google Apps Script 驗證）
+    window.login = async function() {
+      // 清理和驗證輸入
+      const rawCourseCode = document.getElementById('login-course-code-input').value.trim();
+      const courseCode = sanitizeInput(rawCourseCode).toUpperCase();
+      const password = document.getElementById('login-password-input').value;
+      const errorEl = document.getElementById('login-error');
+
+      if (!courseCode) {
+        errorEl.innerText = '請輸入課程編號';
+        return;
+      }
+
+      if (!password) {
+        errorEl.innerText = '請輸入密碼';
+        return;
+      }
+
+      // 顯示載入狀態
+      errorEl.innerText = '正在驗證...';
+      errorEl.style.color = '#666';
+      const loginButton = document.querySelector('#password-login-screen ion-button');
+      loginButton.disabled = true;
+      loginButton.innerHTML = '<ion-spinner name="crescent"></ion-spinner> 驗證中...';
+
+      try {
+        // 通過 Google Apps Script 驗證課程並獲取練習清單
+        if (!GOOGLE_APPS_SCRIPT_URL) {
+          throw new Error('未設置伺服器連接，請聯繫管理員');
+        }
+
+        const urlParams = new URLSearchParams({
+          action: 'verifyCourse',
+          courseCode: courseCode,
+          password: password
+        });
+        const requestUrl = `${GOOGLE_APPS_SCRIPT_URL}?${urlParams.toString()}`;
+        
+        // 調試信息
+        console.log('登入請求 URL:', requestUrl);
+        console.log('課程編號:', courseCode);
+        console.log('伺服器連接已設置:', !!GOOGLE_APPS_SCRIPT_URL);
+
+        const response = await fetch(requestUrl, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache',
+          headers: {
+            'Accept': 'application/json'
+          }
+        }).catch(fetchError => {
+          // 捕获网络错误
+          console.error('Fetch 錯誤詳情:', fetchError);
+          throw new Error(`無法連接到伺服器。請檢查：\n1. 網路連接是否正常\n2. 伺服器連接設定是否正確\n3. 伺服器是否已正確部署\n\n錯誤詳情: ${fetchError.message}`);
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => '無法讀取錯誤信息');
+          throw new Error(`無法連接到服務器 (HTTP ${response.status})\n${errorText}`);
+        }
+
+        let data;
+        try {
+          const responseText = await response.text();
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('解析響應失敗:', parseError);
+          throw new Error('伺服器返回的數據格式錯誤，請檢查伺服器配置');
+        }
+
+        if (!data.success) {
+          // 驗證失敗
+          errorEl.innerText = data.error || '驗證失敗，請檢查課程編號和密碼';
+          errorEl.style.color = 'var(--ion-color-danger)';
+          logAccess('login_attempt', false, `課程編號: ${courseCode}, 錯誤: ${data.error}`);
+          document.getElementById('login-password-input').value = '';
+          
+          // 如果是課程過期，顯示過期日期
+          if (data.error === '課程已過期' && data.expiryDate) {
+            errorEl.innerText = `課程已過期（有效期至：${data.expiryDate}）`;
+          }
+          
+          loginButton.disabled = false;
+          loginButton.innerHTML = '登入';
+          return;
+        }
+
+        // 驗證成功，保存練習清單
+        if (data.practices && Array.isArray(data.practices)) {
+          PRACTICES = data.practices;
+          console.log('成功載入練習清單，共', PRACTICES.length, '個練習');
+          // 保存到 sessionStorage，以便刷新後恢復
+          savePracticesToStorage(PRACTICES, courseCode);
+        } else {
+          console.warn('未返回練習清單或格式錯誤');
+          PRACTICES = [];
+        }
+
+        // 登入成功
+        errorEl.innerText = '';
+        setLoggedIn(courseCode); // 設置登入狀態和課程編號
+        logAccess('login_attempt', true, `登入成功 - 課程編號: ${courseCode}`);
+        
+        loginButton.disabled = false;
+        loginButton.innerHTML = '登入';
+        
+        showPracticeSelect();
+        
+      } catch (error) {
+        console.error('登入錯誤:', error);
+        
+        // 提供更友好的錯誤信息
+        let errorMessage = error.message || '未知錯誤';
+        
+        // 如果是網絡錯誤，提供更詳細的幫助信息
+        if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('無法連接到服務器'))) {
+          errorMessage = `無法連接到伺服器\n\n可能的原因：\n1. 網路連接問題\n2. 伺服器未正確部署\n3. 伺服器連接設定錯誤\n\n請檢查：\n- 網路連接是否正常\n- 伺服器是否已正確部署\n- 伺服器連接設定是否正確\n- 請聯繫管理員檢查伺服器狀態`;
+        }
+        
+        errorEl.innerText = `登入失敗：${errorMessage}`;
+        errorEl.style.color = 'var(--ion-color-danger)';
+        errorEl.style.whiteSpace = 'pre-line'; // 允許換行顯示
+        logAccess('login_attempt', false, `課程編號: ${courseCode}, 錯誤: ${error.message}`);
+        
+        loginButton.disabled = false;
+        loginButton.innerHTML = '登入';
+      }
+    }
+
+    // 登出
+    window.logout = function() {
+      clearLogin(); // 清除登入狀態
+      hideAllScreens();
+      showPasswordLogin();
+    }
+
+    // 顯示練習選擇畫面
+    function showPracticeSelect() {
+      hideAllScreens();
+      disableContentProtection();
+      removeWatermark();
+      practiceSelectScreen.classList.remove('hidden');
+      
+      // 動態修改容器樣式以充分利用寬度
+      const quizContainer = document.querySelector('.quiz-container');
+      if (quizContainer) {
+        quizContainer.style.maxWidth = '100%';
+        quizContainer.style.width = '100%';
+        quizContainer.style.padding = '0';
+      }
+      
+      const currentCourseCode = getCurrentCourseCode();
+      const practiceList = document.getElementById('practice-list');
+      practiceList.innerHTML = '';
+
+      // 顯示當前課程編號
+      const courseCodeDisplay = document.getElementById('current-course-code-display');
+      if (courseCodeDisplay) {
+        courseCodeDisplay.textContent = currentCourseCode;
+      }
+
+      // 獲取當前學生的所有進度（如果有的話）
+      // 注意：這裡我們需要知道學生姓名，但可能還沒有輸入
+      // 所以我們先顯示所有練習，然後在選擇時檢查進度
+
+      // 顯示排行榜（異步）
+      displayLeaderboard(currentCourseCode).catch(err => {
+        console.error('顯示排行榜失敗:', err);
+      });
+
+      // 根據課程編號過濾練習
+      const filteredPractices = PRACTICES.filter(practice => practice.courseCode === currentCourseCode);
+
+      if (filteredPractices.length === 0) {
+        practiceList.innerHTML = `
+          <ion-card>
+            <ion-card-content class="ion-text-center" style="padding: 40px 20px;">
+              <ion-icon name="document-outline" style="font-size: 48px; color: #999; margin-bottom: 10px;"></ion-icon>
+              <p style="color: #666;">此課程編號暫無可用練習</p>
+            </ion-card-content>
+          </ion-card>
+        `;
+        return;
+      }
+
+      filteredPractices.forEach((practice, index) => {
+        const card = document.createElement('ion-card');
+        card.className = 'practice-card';
+        
+        // 檢查是否有任何學生對這個練習有進度（顯示進度提示）
+        const allProgress = getAllPracticeProgress();
+        let progressInfo = null;
+        for (const [key, progress] of Object.entries(allProgress)) {
+          // 檢查練習ID和課程編號是否匹配
+          if (progress.practiceId === practice.id && 
+              (progress.courseCode === currentCourseCode || !progress.courseCode)) {
+            progressInfo = progress;
+            break;
+          }
+        }
+        
+        // 如果有進度，顯示進度信息（只顯示未完成的）
+        let progressBadge = '';
+        if (progressInfo) {
+          // 確保進度信息存在且有效
+          const studentName = progressInfo.studentName || '未知';
+          const answeredCount = progressInfo.historyData ? progressInfo.historyData.length : 0;
+          progressBadge = `
+            <div style="margin-top: 8px; padding: 6px 10px; background-color: #eff6ff; border-radius: 4px; border-left: 3px solid var(--ion-color-primary);">
+              <p style="margin: 0; color: var(--ion-color-primary); font-size: 0.8em; font-weight: 500;">
+                <ion-icon name="time-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon>
+                未完成：學生 ${escapeHtml(studentName)} | 已答 ${answeredCount} 題
+              </p>
+            </div>
+          `;
+        }
+        
+        card.innerHTML = `
+          <ion-card-content style="padding: 14px;">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <ion-icon name="${progressInfo ? 'play-circle' : 'document-text'}" style="font-size: 28px; color: ${progressInfo ? 'var(--ion-color-primary)' : 'var(--ion-color-primary)'}; flex-shrink: 0; margin-top: 2px;"></ion-icon>
+              <div style="flex: 1; min-width: 0;">
+                <h3 style="margin: 0 0 6px 0; font-weight: 600; font-size: 1em; line-height: 1.3;">${escapeHtml(practice.name || '')}</h3>
+                <p style="margin: 0 0 4px 0; color: #666; font-size: 0.85em; line-height: 1.4;">${escapeHtml(practice.description || '')}</p>
+                <p style="margin: 0; color: #999; font-size: 0.75em;">及格: ${escapeHtml(String(practice.passingScore || 0))} 分</p>
+                ${progressBadge}
+              </div>
+            </div>
+          </ion-card-content>
+        `;
+        card.onclick = () => selectPractice(practice);
+        practiceList.appendChild(card);
+      });
+    }
+
+    // 顯示排行榜（異步）
+    async function displayLeaderboard(courseCode) {
+      const leaderboardContainer = document.getElementById('leaderboard-container');
+      if (!leaderboardContainer) return;
+
+      // 顯示載入中
+      leaderboardContainer.innerHTML = `
+        <ion-card>
+          <ion-card-content class="ion-text-center" style="padding: 20px;">
+            <ion-spinner name="crescent" color="primary"></ion-spinner>
+            <p style="color: #666; font-size: 0.9em; margin-top: 10px;">載入排行榜中...</p>
+          </ion-card-content>
+        </ion-card>
+      `;
+
+      try {
+        // 檢查是否設置了 Google Apps Script URL
+        if (!GOOGLE_APPS_SCRIPT_URL) {
+          leaderboardContainer.innerHTML = `
+            <ion-card>
+              <ion-card-content class="ion-text-center" style="padding: 20px;">
+                <ion-icon name="warning-outline" style="font-size: 32px; color: #ffc409; margin-bottom: 10px;"></ion-icon>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 5px;">未設置資料庫連接</p>
+                <p style="color: #999; font-size: 0.8em;">請聯繫管理員設置伺服器連接</p>
+              </ion-card-content>
+            </ion-card>
+          `;
+          return;
+        }
+
+        const allScores = await getAllScoresByCourse(courseCode);
+        
+        // 調試：檢查數據
+        console.log('從資料庫讀取的得分數據:', allScores);
+        console.log('數據數量:', allScores.length);
+        
+        if (allScores.length === 0) {
+          leaderboardContainer.innerHTML = `
+            <ion-card>
+              <ion-card-content class="ion-text-center" style="padding: 20px;">
+                <p style="color: #666; font-size: 0.9em;">暫無得分記錄</p>
+                <p style="color: #999; font-size: 0.8em; margin-top: 5px;">數據從資料庫讀取</p>
+              </ion-card-content>
+            </ion-card>
+          `;
+          return;
+        }
+
+      // 計算3個月前的時間戳
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      const threeMonthsAgoTimestamp = threeMonthsAgo.getTime();
+      
+      // 過濾掉超過3個月的記錄
+      const recentScores = allScores.filter(scoreEntry => {
+        if (!scoreEntry.timestamp) {
+          // 如果沒有時間戳，保留記錄（向後兼容）
+          return true;
+        }
+        
+        // 解析時間戳（可能是 ISO 字符串或數字）
+        let timestamp;
+        if (typeof scoreEntry.timestamp === 'string') {
+          timestamp = new Date(scoreEntry.timestamp).getTime();
+        } else {
+          timestamp = scoreEntry.timestamp;
+        }
+        
+        // 只保留3個月內的記錄
+        return timestamp >= threeMonthsAgoTimestamp;
+      });
+      
+      // 按練習分組
+      const practicesInCourse = PRACTICES.filter(p => p.courseCode === courseCode);
+      let leaderboardHTML = '';
+
+      practicesInCourse.forEach(practice => {
+        const practiceScores = recentScores
+          .filter(s => s.practiceId === practice.id)
+          .map(s => ({
+            ...s,
+            score: Number(s.score) || 0 // 確保分數是數字
+          }))
+          .sort((a, b) => {
+            // 確保使用數字比較
+            const scoreA = Number(a.score) || 0;
+            const scoreB = Number(b.score) || 0;
+            return scoreB - scoreA; // 降序排列
+          })
+          .slice(0, 10); // 每個練習只顯示前10名
+
+        if (practiceScores.length === 0) return;
+
+        leaderboardHTML += `
+          <ion-card style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; min-height: 280px; max-height: none; overflow: visible;">
+            <ion-card-header style="flex-shrink: 0; padding: 12px 16px;">
+              <ion-card-title style="font-size: 0.95em; line-height: 1.3;">${escapeHtml(practice.name || '')}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content style="padding: 8px 12px; width: 100%; box-sizing: border-box; flex: 1; overflow-y: auto; overflow-x: visible; min-height: 0; max-height: none;">
+              <ion-list lines="none" style="width: 100%;">
+        `;
+
+        practiceScores.forEach((scoreEntry, index) => {
+          const rank = index + 1;
+          const medalIcon = rank === 1 ? '🏆' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+          const rankColor = rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : '#666';
+          
+          // 確保分數是數字並格式化
+          const score = Math.round(Number(scoreEntry.score) || 0);
+          const studentName = scoreEntry.studentName || '未知';
+          
+          leaderboardHTML += `
+            <ion-item style="--padding-start: 0; --padding-end: 0; width: 100%; --min-height: 40px;">
+              <div style="display: flex; align-items: center; width: 100%; gap: 8px; padding: 4px 0;">
+                <div style="min-width: 28px; text-align: center; font-weight: bold; color: ${rankColor}; font-size: 0.95em; flex-shrink: 0;">
+                  ${medalIcon || rank}
+                </div>
+                <div style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;">
+                  <strong style="word-break: break-word; font-size: 0.9em; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(studentName || '未知')}</strong>
+                </div>
+                <div style="min-width: 55px; text-align: right; font-weight: bold; color: var(--ion-color-primary); flex-shrink: 0; font-size: 0.9em;">
+                  ${score}分
+                </div>
+              </div>
+            </ion-item>
+          `;
+        });
+
+        leaderboardHTML += `
+              </ion-list>
+            </ion-card-content>
+          </ion-card>
+        `;
+      });
+
+        leaderboardContainer.innerHTML = leaderboardHTML || `
+          <ion-card>
+            <ion-card-content class="ion-text-center" style="padding: 20px;">
+              <p style="color: #666; font-size: 0.9em;">暫無得分記錄</p>
+            </ion-card-content>
+          </ion-card>
+        `;
+      } catch (error) {
+        console.error('從資料庫載入排行榜失敗:', error);
+        leaderboardContainer.innerHTML = `
+          <ion-card>
+            <ion-card-content class="ion-text-center" style="padding: 20px;">
+              <ion-icon name="alert-circle-outline" style="font-size: 32px; color: var(--ion-color-danger); margin-bottom: 10px;"></ion-icon>
+              <p style="color: var(--ion-color-danger); font-size: 0.9em; margin-bottom: 5px;">無法從資料庫讀取數據</p>
+              <p style="color: #999; font-size: 0.8em;">請檢查：</p>
+              <ul style="text-align: left; color: #999; font-size: 0.8em; margin-top: 10px; padding-left: 20px;">
+                <li>伺服器連接設定是否正確</li>
+                <li>資料庫權限設置</li>
+                <li>網路連接是否正常</li>
+              </ul>
+            </ion-card-content>
+          </ion-card>
+        `;
+      }
+    }
+
+    // 選擇練習
+    function selectPractice(practice) {
+      currentPractice = practice;
+      PASSING_SCORE = practice.passingScore;
+      // 關閉菜單（如果是手機版）
+      closePracticeMenu();
+      // 先顯示姓名輸入界面
+      showNameInput();
+    }
+
+    // 顯示姓名輸入界面
+    function showNameInput() {
+      hideAllScreens();
+      disableContentProtection();
+      removeWatermark();
+      
+      // 檢查是否有這個練習的未完成進度
+      const allProgress = getAllPracticeProgress();
+      const currentCourseCode = getCurrentCourseCode();
+      let existingProgress = null;
+      
+      for (const [key, progress] of Object.entries(allProgress)) {
+        if (progress.practiceId === currentPractice.id && 
+            (progress.courseCode === currentCourseCode || !progress.courseCode)) {
+          existingProgress = progress;
+          break;
+        }
+      }
+      
+      // 如果有進度，直接恢復，不需要輸入姓名
+      if (existingProgress && existingProgress.studentName) {
+        console.log('檢測到未完成的練習，直接恢復:', existingProgress);
+        
+        // 設置所有必要的變量
+        currentStudentName = existingProgress.studentName;
+        currentQIndex = existingProgress.currentQIndex || 0;
+        historyData = existingProgress.historyData || [];
+        score = existingProgress.score || 0;
+        
+        // 確保使用正確的 CSV URL
+        const csvUrl = existingProgress.csvUrl || currentPractice.csvUrl;
+        
+        console.log('恢復進度:', {
+          practiceId: currentPractice.id,
+          studentName: currentStudentName,
+          currentQIndex: currentQIndex,
+          historyLength: historyData.length,
+          score: score
+        });
+        
+        // 直接恢復練習
+        hideAllScreens();
+        loadingScreen.classList.remove('hidden');
+        loadQuestionsAndResume(csvUrl);
+        return;
+      }
+      
+      // 沒有進度，顯示姓名輸入界面
+      nameInputScreen.classList.remove('hidden');
+      document.getElementById('name-input-error').innerText = '';
+      
+      const nameInput = document.getElementById('student-name-input');
+      nameInput.value = '';
+      
+      // 設置 Enter 鍵事件
+      const newNameInput = nameInput.cloneNode(true);
+      nameInput.parentNode.replaceChild(newNameInput, nameInput);
+      
+      document.getElementById('student-name-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          startPracticeWithName();
+        }
+      });
+      
+      // 自動聚焦
+      setTimeout(() => {
+        document.getElementById('student-name-input').focus();
+      }, 100);
+    }
+
+    // 開始練習（帶姓名）
+    window.startPracticeWithName = function() {
+      // 清理和驗證輸入
+      const rawStudentName = document.getElementById('student-name-input').value.trim();
+      const studentName = sanitizeInput(rawStudentName);
+      const errorEl = document.getElementById('name-input-error');
+
+      if (!studentName) {
+        errorEl.innerText = '請輸入您的姓名';
+        return;
+      }
+
+      if (studentName.length < 2) {
+        errorEl.innerText = '姓名至少需要2個字元';
+        return;
+      }
+
+      if (studentName.length > 20) {
+        errorEl.innerText = '姓名不能超過20個字元';
+        return;
+      }
+
+      // 檢查是否有未完成的練習（同一個練習和學生）
+      const progress = loadPracticeProgress(currentPractice.id, studentName);
+      if (progress && progress.practiceId === currentPractice.id && progress.studentName === studentName) {
+        // 詢問是否繼續
+        if (confirm(`檢測到未完成的練習「${progress.practiceName}」\n學生：${studentName}\n已答 ${progress.historyData.length} 題\n\n是否繼續？`)) {
+          currentStudentName = studentName;
+          currentQIndex = progress.currentQIndex;
+          historyData = progress.historyData || [];
+          score = progress.score || 0;
+          hideAllScreens();
+          loadingScreen.classList.remove('hidden');
+          loadQuestionsAndResume(currentPractice.csvUrl);
+          return;
+        } else {
+          // 重新開始，清除這個練習的進度
+          clearPracticeProgress(currentPractice.id, studentName);
+        }
+      }
+
+      // 開始新練習
+      currentStudentName = studentName;
+      currentQIndex = 0;
+      historyData = [];
+      score = 0;
+      errorEl.innerText = '';
+      logAccess('practice_start', true, `開始練習: ${currentPractice.name}, 學生: ${studentName}`);
+      hideAllScreens();
+      loadingScreen.classList.remove('hidden');
+      loadQuestions(currentPractice.csvUrl);
+    }
+
+    // 隱藏所有畫面
+    function hideAllScreens() {
+      passwordSetupScreen.classList.add('hidden');
+      passwordLoginScreen.classList.add('hidden');
+      
+      // 如果隱藏練習選擇畫面，恢復容器樣式
+      if (!practiceSelectScreen.classList.contains('hidden')) {
+        const quizContainer = document.querySelector('.quiz-container');
+        if (quizContainer) {
+          quizContainer.style.maxWidth = '';
+          quizContainer.style.width = '';
+          quizContainer.style.padding = '';
+        }
+      }
+      
+      practiceSelectScreen.classList.add('hidden');
+      nameInputScreen.classList.add('hidden');
+      loadingScreen.classList.add('hidden');
+      errorScreen.classList.add('hidden');
+      quizScreen.classList.add('hidden');
+      resultScreen.classList.add('hidden');
+    }
+
+    // 返回練習選擇（從結果畫面或姓名輸入畫面）
+    window.backToPracticeSelect = function() {
+      // 檢查是否從結果畫面返回
+      const isFromResultScreen = !resultScreen.classList.contains('hidden');
+      
+      // 如果從結果畫面返回，說明練習已完成，進度已在 showResults() 中清除
+      // 不需要再次保存進度，並且應該清除相關變量
+      if (isFromResultScreen) {
+        // 清除當前練習相關變量，避免重新保存進度
+        currentPractice = null;
+        currentStudentName = '';
+        currentQIndex = 0;
+        score = 0;
+        historyData = [];
+        console.log('從結果畫面返回，已清除練習相關變量');
+      } else {
+        // 從其他畫面返回，保存當前進度（如果有的話）
+        if (currentPractice && currentStudentName) {
+          savePracticeProgress();
+        }
+      }
+      
+      hideAllScreens();
+      showPracticeSelect();
+    }
+
+    // 從練習畫面返回練習選擇（保存進度）
+    window.backToPracticeSelectFromQuiz = function() {
+      // 確認是否要返回
+      if (confirm('確定要返回練習目錄嗎？當前進度會自動保存，您可以稍後繼續。')) {
+        // 保存當前進度
+        if (currentPractice && currentStudentName) {
+          savePracticeProgress();
+          console.log('已保存進度並返回練習目錄');
+        }
+        hideAllScreens();
+        showPracticeSelect();
+      }
+    }
+
+    // 1. CSV 解析器
+    function parseCSV(text) {
+      const rows = [];
+      let currentRow = [];
+      let currentCell = '';
+      let insideQuote = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+          if (insideQuote && nextChar === '"') {
+            currentCell += '"'; 
+            i++;
+          } else {
+            insideQuote = !insideQuote;
+          }
+        } else if (char === ',' && !insideQuote) {
+          currentRow.push(currentCell.trim());
+          currentCell = '';
+        } else if ((char === '\r' || char === '\n') && !insideQuote) {
+          if (currentCell || currentRow.length > 0) {
+            currentRow.push(currentCell.trim());
+            rows.push(currentRow);
+          }
+          currentRow = [];
+          currentCell = '';
+          if (char === '\r' && nextChar === '\n') i++;
+        } else {
+          currentCell += char;
+        }
+      }
+      if (currentCell || currentRow.length > 0) {
+        currentRow.push(currentCell.trim());
+        rows.push(currentRow);
+      }
+      return rows;
+    }
+
+    // 2. 從 Google Spreadsheet 連結中提取 Spreadsheet ID
+    function extractSpreadsheetId(url) {
+      if (!url) {
+        console.warn('extractSpreadsheetId: URL 為空');
+        return null;
+      }
+      
+      // 從各種格式的 URL 中提取 ID
+      // 格式1: https://docs.google.com/spreadsheets/d/ID/edit...
+      // 格式2: https://docs.google.com/spreadsheets/d/ID/gviz/...
+      // 格式3: https://docs.google.com/spreadsheets/d/e/ID/pub...
+      const match = url.match(/\/spreadsheets\/d\/(?:e\/)?([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        const id = match[1].trim();
+        console.log('成功提取 Spreadsheet ID:', id);
+        return id;
+      }
+      
+      console.warn('無法從 URL 中提取 Spreadsheet ID:', url);
+      return null;
+    }
+
+    // 3. 從 Google Spreadsheet 加載練習清單（已廢棄）
+    // 注意：此函數已不再使用。練習清單現在在登入時通過 verifyCourse 操作獲取
+    // 這樣可以保護 Spreadsheet URL 不被暴露在前端代碼中
+    async function loadPracticesFromSheet() {
+      console.warn('loadPracticesFromSheet 已廢棄。練習清單現在在登入時通過 Google Apps Script 驗證後獲取。');
+      return;
+    }
+
+    // 4. 直接從 CSV 讀取練習清單（已廢棄，不再使用）
+    // 注意：此函數已不再使用。所有數據現在都通過 Google Apps Script 驗證後獲取
+    async function loadPracticesFromCsv() {
+      console.warn('loadPracticesFromCsv 已廢棄。練習清單現在在登入時通過 Google Apps Script 驗證後獲取。');
+      return;
+    }
+
+    // 測試課程驗證（可在控制台調用）
+    // 用法：testCourseVerification('CS101', 'password123')
+    window.testCourseVerification = async function(courseCode, password) {
+      console.log('開始測試課程驗證...');
+      
+      if (!GOOGLE_APPS_SCRIPT_URL) {
+        console.error('❌ GOOGLE_APPS_SCRIPT_URL 未設置');
+        return;
+      }
+      
+      if (!courseCode || !password) {
+        console.error('❌ 請提供課程編號和密碼');
+        console.log('用法：testCourseVerification("CS101", "password123")');
+        return;
+      }
+      
+      console.log('✅ 課程編號:', courseCode);
+      console.log('✅ 伺服器連接:', GOOGLE_APPS_SCRIPT_URL);
+      
+      // 使用 URLSearchParams 構建 URL
+      const urlParams = new URLSearchParams({
+        action: 'verifyCourse',
+        courseCode: courseCode,
+        password: password
+      });
+      const testUrl = `${GOOGLE_APPS_SCRIPT_URL}?${urlParams.toString()}`;
+      console.log('測試 URL:', testUrl);
+      console.log('URL 參數:', urlParams.toString());
+      
+      try {
+        const response = await fetch(testUrl, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        console.log('響應狀態:', response.status, response.statusText);
+        
+        const text = await response.text();
+        console.log('響應內容:', text);
+        
+        try {
+          const data = JSON.parse(text);
+          console.log('解析後的數據:', data);
+          
+          if (data.success) {
+            console.log('✅ 驗證成功！找到', data.practices?.length || 0, '個練習');
+            console.log('練習列表:', data.practices);
+          } else {
+            console.error('❌ 驗證失敗:', data.error);
+            if (data.expiryDate) {
+              console.error('過期日期:', data.expiryDate);
+            }
+          }
+        } catch (jsonError) {
+          console.error('❌ 無法解析 JSON 響應:', jsonError);
+          console.error('原始響應:', text);
+        }
+      } catch (error) {
+        console.error('❌ 請求失敗:', error);
+      }
+    };
+
+    // 3. 初始化應用
+    async function init() {
+      hideAllScreens();
+      
+      // 檢查是否已登入（使用 sessionStorage，關閉瀏覽器後失效）
+      if (isLoggedIn()) {
+        const courseCode = getCurrentCourseCode();
+        
+        if (courseCode) {
+          // 先嘗試從 sessionStorage 恢復練習清單（快速顯示）
+          const storedPractices = loadPracticesFromStorage(courseCode);
+          
+          if (storedPractices && storedPractices.length > 0) {
+            // 先使用緩存的練習清單
+            PRACTICES = storedPractices;
+            console.log('已從 sessionStorage 恢復練習清單，共', PRACTICES.length, '個練習');
+            
+            // 注意：現在支持多個練習同時進行，所以不在 init 時自動恢復
+            // 進度會在練習選擇頁面顯示，學生可以選擇繼續哪個練習
+            
+            // 沒有未完成的練習，顯示練習選擇頁面
+            showPracticeSelect();
+            
+            // 在後台嘗試從服務器獲取最新練習清單
+            try {
+              const latestPractices = await fetchPracticesFromServer(courseCode);
+              
+              // 如果返回 null，表示服務器不支持此操作，使用緩存
+              if (latestPractices === null) {
+                console.log('服務器不支持 getPractices 操作，繼續使用緩存版本');
+                return;
+              }
+              
+              // 檢查是否有更新（比較練習數量或 ID）
+              const hasUpdate = JSON.stringify(latestPractices) !== JSON.stringify(storedPractices);
+              
+              if (hasUpdate) {
+                // 有更新，使用最新列表
+                PRACTICES = latestPractices;
+                savePracticesToStorage(PRACTICES, courseCode);
+                console.log('練習清單已更新，共', PRACTICES.length, '個練習');
+                
+                // 重新顯示練習選擇畫面以反映更新
+                showPracticeSelect();
+              } else {
+                console.log('練習清單無更新');
+              }
+            } catch (error) {
+              // 獲取失敗，繼續使用緩存的列表
+              console.warn('無法從服務器獲取最新練習清單，使用緩存版本:', error.message);
+            }
+          } else {
+            // 無法從 sessionStorage 恢復，嘗試從服務器獲取
+            try {
+              const practices = await fetchPracticesFromServer(courseCode);
+              
+              // 如果返回 null，表示服務器不支持此操作，需要重新登入
+              if (practices === null) {
+                console.warn('服務器不支持 getPractices 操作，需要重新登入');
+                clearLogin();
+                showPasswordLogin();
+                return;
+              }
+              
+              PRACTICES = practices;
+              savePracticesToStorage(PRACTICES, courseCode);
+              console.log('從服務器獲取練習清單，共', PRACTICES.length, '個練習');
+              
+              // 注意：現在支持多個練習同時進行，所以不在 init 時自動恢復
+              // 進度會在練習選擇頁面顯示，學生可以選擇繼續哪個練習
+              
+              showPracticeSelect();
+            } catch (error) {
+              // 獲取失敗，清除登入狀態，要求重新登入
+              console.error('無法獲取練習清單，需要重新登入:', error.message);
+              clearLogin();
+              showPasswordLogin();
+            }
+          }
+        } else {
+          // 沒有課程編號，清除登入狀態
+          clearLogin();
+          showPasswordLogin();
+        }
+      } else {
+        showPasswordLogin();
+      }
+    }
+
+    // 顯示密碼登入畫面
+    function showPasswordLogin() {
+      hideAllScreens();
+      disableContentProtection();
+      removeWatermark();
+      passwordLoginScreen.classList.remove('hidden');
+      document.getElementById('login-error').innerText = '';
+      document.getElementById('login-course-code-input').value = '';
+      document.getElementById('login-password-input').value = '';
+      
+      // 設置 Enter 鍵事件
+      const loginCourseCodeInput = document.getElementById('login-course-code-input');
+      const loginPasswordInput = document.getElementById('login-password-input');
+      
+      // 移除舊的事件監聽器
+      const newCourseCodeInput = loginCourseCodeInput.cloneNode(true);
+      loginCourseCodeInput.parentNode.replaceChild(newCourseCodeInput, loginCourseCodeInput);
+      const newPasswordInput = loginPasswordInput.cloneNode(true);
+      loginPasswordInput.parentNode.replaceChild(newPasswordInput, loginPasswordInput);
+      
+      // 課程編號輸入框：按 Enter 跳到密碼輸入框
+      document.getElementById('login-course-code-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('login-password-input').focus();
+        }
+      });
+      
+      // 密碼輸入框：按 Enter 執行登入
+      document.getElementById('login-password-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          login();
+        }
+      });
+      
+      // 自動聚焦到課程編號輸入框
+      setTimeout(() => {
+        document.getElementById('login-course-code-input').focus();
+      }, 100);
+    }
+
+    // 3. 載入題目（新練習）
+    async function loadQuestions(csvUrl) {
+      try {
+        // 注意：不清除其他練習的進度，因為可能有多個練習同時進行
+        // 只保存當前練習的進度
+        
+        // 檢查是否使用範例 URL
+        if (csvUrl.includes("2PACX-1vR6y2w2J2tO_k-X8tXQy3z5oP5o5z5o5z5o5z5o")) {
+           // 模擬資料
+           questions = [
+             { id: 1, question: "（示範題）請更換練習配置中的 CSV 連結", options: ["好", "不好", "連結在哪?", "略過"], correctAnswer: 0, explanation: "請在 PRACTICES 陣列中更新 CSV 連結。" },
+             { id: 2, question: "（示範題）Ionic 是什麼？", options: ["資料庫", "UI Framework", "後端語言", "作業系統"], correctAnswer: 1, explanation: "Ionic 是一個用於建立跨平台 App 的 UI Framework。" }
+           ];
+        } else {
+          const response = await fetch(csvUrl);
+          if (!response.ok) throw new Error("網路請求失敗");
+          const csvText = await response.text();
+          const parsedRows = parseCSV(csvText);
+          const dataRows = parsedRows.slice(1); // 去除標題
+
+          questions = dataRows
+            .filter(row => {
+              // 至少需要題目和選項
+              const hasQuestion = row[0] && row[0].trim().length > 0;
+              const hasOptions = row[1] && row[1].trim().length > 0;
+              return hasQuestion && hasOptions;
+            })
+            .map((row, index) => {
+              // 解析選項：支持多種格式
+              let options = [];
+              let parseMethod = '';
+              
+              // 格式1：選項存儲在一個單元格中，用分隔符分隔（推薦）
+              // 支持的分隔符：| 或 ; 或 || 或 ;;
+              if (row[1] && (row[1].includes('|') || row[1].includes(';'))) {
+                // 使用分隔符拆分選項
+                const separator = row[1].includes('||') ? '||' : 
+                                 row[1].includes(';;') ? ';;' :
+                                 row[1].includes('|') ? '|' : ';';
+                options = row[1].split(separator).map(opt => opt.trim()).filter(opt => opt.length > 0);
+                parseMethod = `分隔符格式 (${separator})`;
+              } 
+              // 格式2：選項分別存儲在不同列中（向後兼容）
+              else if (row.length >= 7 && row[1] && row[2] && row[3] && row[4]) {
+                options = [row[1], row[2], row[3], row[4]].filter(opt => opt && opt.trim().length > 0);
+                parseMethod = '多列格式';
+              }
+              // 格式3：只有一個選項列，嘗試用其他分隔符
+              else if (row[1]) {
+                // 嘗試用換行符或其他字符分隔
+                options = row[1].split(/\n|\r\n|\\n/).map(opt => opt.trim()).filter(opt => opt.length > 0);
+                if (options.length > 1) {
+                  parseMethod = '換行符格式';
+                } else if (options.length === 1 && row[1].includes(',')) {
+                  // 如果還是只有一個，嘗試用逗號分隔
+                  options = row[1].split(',').map(opt => opt.trim()).filter(opt => opt.length > 0);
+                  parseMethod = '逗號分隔格式';
+                } else {
+                  // 如果只有一個選項，將其作為單一選項
+                  options = [row[1].trim()];
+                  parseMethod = '單一選項格式';
+                }
+              }
+              
+              // 如果還是沒有選項，使用默認值
+              if (options.length === 0) {
+                console.warn(`第 ${index + 2} 行：無法解析選項，使用默認值`, row);
+                options = ['選項A', '選項B', '選項C', '選項D'];
+                parseMethod = '默認值';
+              }
+              
+              // 調試信息（僅在開發環境顯示）
+              if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
+                console.log(`題目 ${index + 1}: 解析方法=${parseMethod}, 選項數量=${options.length}`, options);
+              }
+              
+              // 解析正確答案
+              // 支持 1-based（1,2,3,4）或 0-based（0,1,2,3）
+              let correctAnswer = 0;
+              if (row.length >= 3 && row[2]) {
+                const answerValue = parseInt(row[2]);
+                if (!isNaN(answerValue)) {
+                  // 如果答案 >= 1，假設是 1-based，需要轉換為 0-based
+                  // 如果答案 = 0，假設已經是 0-based
+                  correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
+                }
+              } else if (row.length >= 6 && row[5]) {
+                // 向後兼容：如果第6列有值，使用它
+                const answerValue = parseInt(row[5]);
+                if (!isNaN(answerValue)) {
+                  correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
+                }
+              }
+              
+              // 確保正確答案在有效範圍內
+              if (correctAnswer < 0 || correctAnswer >= options.length) {
+                correctAnswer = 0;
+              }
+              
+              // 解析解釋（可選）
+              let explanation = '';
+              if (row.length >= 4 && row[3]) {
+                explanation = row[3].trim();
+              } else if (row.length >= 7 && row[6]) {
+                // 向後兼容：如果第7列有值，使用它
+                explanation = row[6].trim();
+              }
+              
+              return {
+                id: index + 1,
+                question: (row[0] || '').trim(),
+                options: options,
+                correctAnswer: correctAnswer,
+                explanation: explanation
+              };
+            })
+            .filter(q => q.question && q.question.length > 0); // 過濾掉沒有題目的行
+        }
+
+        if (questions.length === 0) throw new Error("沒有題目資料");
+
+        loadingScreen.classList.add('hidden');
+        quizScreen.classList.remove('hidden');
+        
+        // 確保容器充分利用寬度
+        const quizContainer = document.querySelector('.quiz-container');
+        if (quizContainer) {
+          quizContainer.style.maxWidth = '100%';
+          quizContainer.style.width = '100%';
+          quizContainer.style.padding = '0';
+        }
+        
+        // 更新練習名稱
+        const practiceNameDisplay = document.getElementById('practice-name-display');
+        if (practiceNameDisplay && currentPractice) {
+          practiceNameDisplay.textContent = currentPractice.name;
+        }
+        
+        // 啟用內容保護
+        enableContentProtection();
+        addWatermark('僅供授權學生使用 - 禁止複製或分享');
+        renderQuestion(); // renderQuestion 內部會調用 updateQuestionList()
+        
+        // 保存初始進度
+        savePracticeProgress();
+
+      } catch (err) {
+        loadingScreen.classList.add('hidden');
+        errorScreen.classList.remove('hidden');
+        document.getElementById('error-message').innerText = err.message + " (請檢查 CSV 連結)";
+      }
+    }
+
+    // 載入題目並恢復進度
+    async function loadQuestionsAndResume(csvUrl) {
+      try {
+        // 使用當前練習和學生姓名獲取進度
+        const progress = loadPracticeProgress(currentPractice.id, currentStudentName);
+        if (!progress) {
+          // 沒有進度，正常載入
+          await loadQuestions(csvUrl);
+          return;
+        }
+
+        // 載入題目（與 loadQuestions 相同的邏輯）
+        if (csvUrl.includes("2PACX-1vR6y2w2J2tO_k-X8tXQy3z5oP5o5z5o5z5o5z5o")) {
+           questions = [
+             { id: 1, question: "（示範題）請更換練習配置中的 CSV 連結", options: ["好", "不好", "連結在哪?", "略過"], correctAnswer: 0, explanation: "請在 PRACTICES 陣列中更新 CSV 連結。" },
+             { id: 2, question: "（示範題）Ionic 是什麼？", options: ["資料庫", "UI Framework", "後端語言", "作業系統"], correctAnswer: 1, explanation: "Ionic 是一個用於建立跨平台 App 的 UI Framework。" }
+           ];
+        } else {
+          const response = await fetch(csvUrl);
+          if (!response.ok) throw new Error("網路請求失敗");
+          const csvText = await response.text();
+          const parsedRows = parseCSV(csvText);
+          const dataRows = parsedRows.slice(1);
+
+          questions = dataRows
+            .filter(row => {
+              const hasQuestion = row[0] && row[0].trim().length > 0;
+              const hasOptions = row[1] && row[1].trim().length > 0;
+              return hasQuestion && hasOptions;
+            })
+            .map((row, index) => {
+              let options = [];
+              
+              if (row[1] && (row[1].includes('|') || row[1].includes(';'))) {
+                const separator = row[1].includes('||') ? '||' : 
+                                 row[1].includes(';;') ? ';;' :
+                                 row[1].includes('|') ? '|' : ';';
+                options = row[1].split(separator).map(opt => opt.trim()).filter(opt => opt.length > 0);
+              } else if (row.length >= 7 && row[1] && row[2] && row[3] && row[4]) {
+                options = [row[1], row[2], row[3], row[4]].filter(opt => opt && opt.trim().length > 0);
+              } else if (row[1]) {
+                options = row[1].split(/\n|\r\n|\\n/).map(opt => opt.trim()).filter(opt => opt.length > 0);
+                if (options.length === 1 && row[1].includes(',')) {
+                  options = row[1].split(',').map(opt => opt.trim()).filter(opt => opt.length > 0);
+                }
+              }
+              
+              if (options.length === 0) {
+                options = ['選項A', '選項B', '選項C', '選項D'];
+              }
+              
+              let correctAnswer = 0;
+              if (row.length >= 3 && row[2]) {
+                const answerValue = parseInt(row[2]);
+                if (!isNaN(answerValue)) {
+                  correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
+                }
+              } else if (row.length >= 6 && row[5]) {
+                const answerValue = parseInt(row[5]);
+                if (!isNaN(answerValue)) {
+                  correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
+                }
+              }
+              
+              if (correctAnswer < 0 || correctAnswer >= options.length) {
+                correctAnswer = 0;
+              }
+              
+              let explanation = '';
+              if (row.length >= 4 && row[3]) {
+                explanation = row[3].trim();
+              } else if (row.length >= 7 && row[6]) {
+                explanation = row[6].trim();
+              }
+              
+              return {
+                id: index + 1,
+                question: (row[0] || '').trim(),
+                options: options,
+                correctAnswer: correctAnswer,
+                explanation: explanation
+              };
+            })
+            .filter(q => q.question && q.question.length > 0);
+        }
+
+        if (questions.length === 0) throw new Error("沒有題目資料");
+
+        // 恢復進度（確保使用進度中的數據，而不是全局變量）
+        if (progress) {
+          currentQIndex = progress.currentQIndex || 0;
+          historyData = progress.historyData || [];
+          score = progress.score || 0;
+          // 確保學生姓名正確
+          if (progress.studentName && !currentStudentName) {
+            currentStudentName = progress.studentName;
+          }
+        }
+
+        loadingScreen.classList.add('hidden');
+        quizScreen.classList.remove('hidden');
+        
+        // 確保容器充分利用寬度
+        const quizContainer = document.querySelector('.quiz-container');
+        if (quizContainer) {
+          quizContainer.style.maxWidth = '100%';
+          quizContainer.style.width = '100%';
+          quizContainer.style.padding = '0';
+        }
+        
+        // 更新練習名稱
+        const practiceNameDisplay = document.getElementById('practice-name-display');
+        if (practiceNameDisplay && currentPractice) {
+          practiceNameDisplay.textContent = currentPractice.name;
+        }
+        
+        enableContentProtection();
+        addWatermark('僅供授權學生使用 - 禁止複製或分享');
+        renderQuestion();
+        
+        // 保存進度
+        savePracticeProgress();
+
+      } catch (err) {
+        loadingScreen.classList.add('hidden');
+        errorScreen.classList.remove('hidden');
+        document.getElementById('error-message').innerText = err.message + " (請檢查 CSV 連結)";
+      }
+    }
+
+    // 更新題目目錄
+    function updateQuestionList() {
+      const questionList = document.getElementById('question-list');
+      if (!questionList) return;
+
+      questionList.innerHTML = '';
+      
+      questions.forEach((q, index) => {
+        const item = document.createElement('div');
+        item.className = 'question-item';
+        
+        // 檢查這題是否已經答過
+        const answeredHistory = historyData.find(h => h.question === q.question);
+        const isCurrent = index === currentQIndex;
+        const isAnswered = !!answeredHistory;
+        const isCorrect = answeredHistory ? answeredHistory.isCorrect : false;
+        
+        // 設置樣式類
+        if (isCurrent) {
+          item.classList.add('current');
+        }
+        if (isAnswered) {
+          item.classList.add('answered');
+          if (!isCorrect) {
+            item.classList.add('wrong');
+          }
+        }
+        
+        // 題目編號和狀態
+        let statusIcon = '';
+        if (isAnswered) {
+          statusIcon = isCorrect ? ' ✓' : ' ✗';
+        }
+        
+        item.innerHTML = `
+          <div style="display: flex; align-items: center;">
+            <span class="question-item-number">${index + 1}.</span>
+            <span style="flex: 1; font-size: 0.9em;">題目 ${index + 1}${statusIcon}</span>
+          </div>
+        `;
+        
+        // 點擊跳轉到該題目
+        item.onclick = () => {
+          if (index !== currentQIndex) {
+            // 保存當前進度
+            savePracticeProgress();
+            // 關閉菜單（如果是手機版）
+            closeQuizMenu();
+            // 跳轉到選中的題目
+            currentQIndex = index;
+            renderQuestion();
+          }
+        };
+        
+        questionList.appendChild(item);
+      });
+    }
+
+    // 4. 渲染題目
+    function renderQuestion() {
+      const currentQ = questions[currentQIndex];
+      
+      // 更新練習名稱
+      const practiceNameDisplay = document.getElementById('practice-name-display');
+      if (practiceNameDisplay && currentPractice) {
+        practiceNameDisplay.textContent = currentPractice.name;
+      }
+      
+      // 更新 UI 狀態
+      qCurrentEl.innerText = currentQIndex + 1;
+      qTotalEl.innerText = questions.length;
+      progressBar.value = (currentQIndex + 1) / questions.length;
+      
+      // 確保問題文字始終顯示且完整
+      questionText.innerText = currentQ.question;
+      questionText.style.display = 'block';
+      questionText.style.visibility = 'visible';
+      questionText.style.opacity = '1';
+      
+      // 確保問題卡片可見
+      const questionCard = questionText.closest('ion-card');
+      if (questionCard) {
+        questionCard.style.display = 'block';
+        questionCard.style.visibility = 'visible';
+        questionCard.style.opacity = '1';
+      }
+      
+      // 更新題目目錄
+      updateQuestionList();
+      
+      // 重置按鈕與回饋區
+      submitBtn.classList.remove('hidden');
+      submitBtn.disabled = true;
+      nextBtn.classList.add('hidden');
+      feedbackArea.classList.add('hidden');
+      selectedOptionIndex = null;
+      isAnswered = false;
+
+      // 檢查這題是否已經答過（恢復進度時）
+      const answeredHistory = historyData.find(h => {
+        // 通過題目內容匹配（因為題目ID可能不穩定）
+        return h.question === currentQ.question;
+      });
+
+      // 產生選項
+      optionsContainer.innerHTML = '';
+      currentQ.options.forEach((opt, idx) => {
+        const card = document.createElement('ion-card');
+        card.className = 'option-card ion-padding';
+        
+        // 如果這題已經答過，顯示之前的答案狀態
+        if (answeredHistory) {
+          const wasSelected = answeredHistory.userSelect === opt;
+          const isCorrect = opt === answeredHistory.correctSelect;
+          
+          if (isCorrect) {
+            card.classList.add('correct');
+          } else if (wasSelected && !isCorrect) {
+            card.classList.add('wrong');
+          }
+        }
+        
+        // 安全地創建選項卡片（防止 XSS）
+        const optDiv = document.createElement('div');
+        optDiv.style.display = 'flex';
+        optDiv.style.alignItems = 'center';
+        const optInnerDiv = document.createElement('div');
+        optInnerDiv.style.flex = '1';
+        optInnerDiv.style.fontWeight = '500';
+        optInnerDiv.textContent = escapeHtml(opt || '');
+        optDiv.appendChild(optInnerDiv);
+        card.appendChild(optDiv);
+        
+        if (!answeredHistory) {
+          card.onclick = () => selectOption(idx, card);
+        } else {
+          // 已答過的題目，顯示為只讀
+          card.style.opacity = '0.8';
+          card.style.cursor = 'default';
+        }
+        
+        optionsContainer.appendChild(card);
+      });
+
+      // 如果這題已經答過，顯示解析
+      if (answeredHistory) {
+        isAnswered = true;
+        submitBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+        
+        // 確保問題文字仍然可見
+        questionText.style.display = 'block';
+        questionText.style.visibility = 'visible';
+        questionText.style.opacity = '1';
+        const questionCard = questionText.closest('ion-card');
+        if (questionCard) {
+          questionCard.style.display = 'block';
+          questionCard.style.visibility = 'visible';
+          questionCard.style.opacity = '1';
+        }
+        
+        feedbackArea.classList.remove('hidden');
+        feedbackArea.style.display = 'block'; // 確保顯示
+        
+        if (answeredHistory.isCorrect) {
+          feedbackArea.style.borderColor = 'var(--ion-color-success)';
+          feedbackArea.style.backgroundColor = '#f0fdf4';
+          feedbackTitle.innerText = "回答正確";
+          feedbackTitle.style.color = 'var(--ion-color-success)';
+          feedbackIcon.name = "checkmark-circle";
+          feedbackIcon.color = "success";
+        } else {
+          feedbackArea.style.borderColor = 'var(--ion-color-danger)';
+          feedbackArea.style.backgroundColor = '#fef2f2';
+          feedbackTitle.innerText = "回答錯誤";
+          feedbackTitle.style.color = 'var(--ion-color-danger)';
+          feedbackIcon.name = "close-circle";
+          feedbackIcon.color = "danger";
+        }
+        
+        // 確保解釋文本有內容
+        const explanation = answeredHistory.explanation || currentQ.explanation || '（此題目暫無詳細解釋）';
+        feedbackText.innerText = explanation;
+        feedbackText.style.display = 'block'; // 確保文本顯示
+        
+        // 確保反饋區域可見
+        feedbackArea.style.visibility = 'visible';
+        feedbackArea.style.opacity = '1';
+        
+        // 如果是最後一題，改按鈕文字
+        if (currentQIndex === questions.length - 1) {
+          nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+        }
+      }
+      
+      // 保存進度
+      savePracticeProgress();
+    }
+
+    // 5. 選擇選項
+    function selectOption(index, cardElement) {
+      if (isAnswered) return;
+
+      selectedOptionIndex = index;
+      submitBtn.disabled = false;
+
+      // 移除其他選項的 selected 樣式
+      document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+      // 加入當前選項樣式
+      cardElement.classList.add('selected');
+    }
+
+    // 6. 提交答案
+    submitBtn.addEventListener('click', () => {
+      if (selectedOptionIndex === null) return;
+      
+      isAnswered = true;
+      const currentQ = questions[currentQIndex];
+      const isCorrect = selectedOptionIndex === currentQ.correctAnswer;
+      const cards = document.querySelectorAll('.option-card');
+
+      // 計算分數
+      if (isCorrect) score += (100 / questions.length);
+
+      // 紀錄歷史
+      historyData.push({
+        question: currentQ.question,
+        userSelect: currentQ.options[selectedOptionIndex],
+        correctSelect: currentQ.options[currentQ.correctAnswer],
+        isCorrect: isCorrect,
+        explanation: currentQ.explanation
+      });
+
+      // 顯示正確/錯誤樣式
+      cards[currentQ.correctAnswer].classList.add('correct'); // 標記正解
+      // 如果選錯了，標記錯誤
+      if (!isCorrect) {
+        cards[selectedOptionIndex].classList.add('wrong');
+      }
+
+      // 確保問題文字仍然可見
+      questionText.style.display = 'block';
+      questionText.style.visibility = 'visible';
+      questionText.style.opacity = '1';
+      const questionCard = questionText.closest('ion-card');
+      if (questionCard) {
+        questionCard.style.display = 'block';
+        questionCard.style.visibility = 'visible';
+        questionCard.style.opacity = '1';
+      }
+      
+      // 顯示解析
+      feedbackArea.classList.remove('hidden');
+      feedbackArea.style.display = 'block'; // 確保顯示
+      
+      if (isCorrect) {
+        feedbackArea.style.borderColor = 'var(--ion-color-success)';
+        feedbackArea.style.backgroundColor = '#f0fdf4';
+        feedbackTitle.innerText = "回答正確";
+        feedbackTitle.style.color = 'var(--ion-color-success)';
+        feedbackIcon.name = "checkmark-circle";
+        feedbackIcon.color = "success";
+      } else {
+        feedbackArea.style.borderColor = 'var(--ion-color-danger)';
+        feedbackArea.style.backgroundColor = '#fef2f2';
+        feedbackTitle.innerText = "回答錯誤";
+        feedbackTitle.style.color = 'var(--ion-color-danger)';
+        feedbackIcon.name = "close-circle";
+        feedbackIcon.color = "danger";
+      }
+      
+      // 確保解釋文本有內容
+      const explanation = currentQ.explanation || '（此題目暫無詳細解釋）';
+      feedbackText.innerText = explanation;
+      feedbackText.style.display = 'block'; // 確保文本顯示
+      
+      // 確保反饋區域可見
+      feedbackArea.style.visibility = 'visible';
+      feedbackArea.style.opacity = '1';
+
+      // 切換按鈕
+      submitBtn.classList.add('hidden');
+      nextBtn.classList.remove('hidden');
+      
+      // 如果是最後一題，改按鈕文字
+      if (currentQIndex === questions.length - 1) {
+        nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+      }
+      
+      // 更新題目目錄（顯示答題狀態）
+      updateQuestionList();
+      
+      // 保存進度（提交答案時自動保存）
+      savePracticeProgress();
+    });
+
+    // 7. 下一題
+    nextBtn.addEventListener('click', () => {
+      if (currentQIndex < questions.length - 1) {
+        currentQIndex++;
+        renderQuestion();
+        // renderQuestion 內部會調用 savePracticeProgress
+      } else {
+        showResults();
+      }
+    });
+
+    // 8. 顯示結果
+    function showResults() {
+      quizScreen.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+      // 保持內容保護
+      enableContentProtection();
+      addWatermark('僅供授權學生使用 - 禁止複製或分享');
+
+      const finalScore = Math.round(score);
+      const isPassed = finalScore >= PASSING_SCORE;
+      const scoreEl = document.getElementById('final-score');
+      const resultMsg = document.getElementById('result-msg');
+      const resultIcon = document.getElementById('result-icon');
+      const studentNameDisplay = document.getElementById('student-name-display');
+
+      // 顯示學生姓名
+      if (studentNameDisplay && currentStudentName) {
+        studentNameDisplay.textContent = `學生：${currentStudentName}`;
+      }
+
+      // 保存得分
+      if (currentStudentName && currentPractice) {
+        const courseCode = getCurrentCourseCode();
+        saveScore(
+          currentStudentName,
+          currentPractice.id,
+          currentPractice.name,
+          finalScore,
+          courseCode
+        );
+      }
+
+      // 清除當前練習的進度（已完成）
+      if (currentPractice && currentStudentName) {
+        clearPracticeProgress(currentPractice.id, currentStudentName);
+        console.log('已清除完成練習的進度:', currentPractice.id, currentStudentName);
+      }
+      
+      // 注意：不清除 currentPractice 和 currentStudentName 變量
+      // 因為返回按鈕需要知道是從哪個練習返回的
+      // 但會在 backToPracticeSelect() 中根據是否從結果畫面返回來決定是否清除
+
+      scoreEl.innerText = finalScore;
+      scoreEl.style.color = isPassed ? 'var(--ion-color-success)' : 'var(--ion-color-danger)';
+      
+      if (isPassed) {
+        resultMsg.innerText = "恭喜通過！";
+        resultIcon.name = "trophy";
+        resultIcon.color = "success";
+      } else {
+        resultMsg.innerText = `未達標 (${PASSING_SCORE}分)，請再接再厲！`;
+        resultIcon.name = "sad";
+        resultIcon.color = "danger";
+      }
+
+      // 產生歷史列表
+      const list = document.getElementById('history-list');
+      list.innerHTML = '';
+      historyData.forEach((h, idx) => {
+        const item = document.createElement('ion-item');
+        item.innerHTML = `
+          <ion-icon name="${h.isCorrect ? 'checkmark-circle' : 'close-circle'}" slot="start" color="${h.isCorrect ? 'success' : 'danger'}"></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h2>Q${idx + 1}: ${escapeHtml(h.question || '')}</h2>
+            ${!h.isCorrect ? `<p style="color:var(--ion-color-danger)">你選了: ${escapeHtml(h.userSelect || '')}</p>` : ''}
+            <p style="color:var(--ion-color-success)">正解: ${escapeHtml(h.correctSelect || '')}</p>
+            <p style="font-size:0.8em; color:#666; margin-top:4px;">${escapeHtml(h.explanation || '（此題目暫無詳細解釋）')}</p>
+          </ion-label>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    // 9. 重新開始
+    window.restartQuiz = function() {
+      // 清除當前練習的進度
+      if (currentPractice && currentStudentName) {
+        clearPracticeProgress(currentPractice.id, currentStudentName);
+      }
+      
+      currentQIndex = 0;
+      score = 0;
+      historyData = [];
+      resultScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+      
+      // 確保容器充分利用寬度
+      const quizContainer = document.querySelector('.quiz-container');
+      if (quizContainer) {
+        quizContainer.style.maxWidth = '100%';
+        quizContainer.style.width = '100%';
+        quizContainer.style.padding = '0';
+      }
+      
+      renderQuestion();
+      // renderQuestion 內部會調用 savePracticeProgress
+    }
+
+    // 更新版權年份
+    function updateCopyrightYear() {
+      const yearElement = document.getElementById('copyright-year');
+      if (yearElement) {
+        const currentYear = new Date().getFullYear();
+        yearElement.textContent = currentYear;
+      }
+    }
+
+    // 手機版側邊菜單控制函數
+    // 練習目錄菜單
+    window.togglePracticeMenu = function() {
+      const sidebar = document.getElementById('practice-sidebar');
+      const overlay = document.getElementById('practice-menu-overlay');
+      if (sidebar && overlay) {
+        sidebar.classList.toggle('menu-open');
+        overlay.classList.toggle('active');
+        // 防止背景滾動
+        if (sidebar.classList.contains('menu-open')) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+      }
+    }
+    
+    window.closePracticeMenu = function() {
+      const sidebar = document.getElementById('practice-sidebar');
+      const overlay = document.getElementById('practice-menu-overlay');
+      if (sidebar && overlay) {
+        sidebar.classList.remove('menu-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+    
+    // 題目目錄菜單
+    window.toggleQuizMenu = function() {
+      const sidebar = document.getElementById('quiz-sidebar');
+      const overlay = document.getElementById('quiz-menu-overlay');
+      if (sidebar && overlay) {
+        sidebar.classList.toggle('menu-open');
+        overlay.classList.toggle('active');
+        // 防止背景滾動
+        if (sidebar.classList.contains('menu-open')) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+      }
+    }
+    
+    window.closeQuizMenu = function() {
+      const sidebar = document.getElementById('quiz-sidebar');
+      const overlay = document.getElementById('quiz-menu-overlay');
+      if (sidebar && overlay) {
+        sidebar.classList.remove('menu-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    // 啟動程式
+    updateCopyrightYear(); // 先更新版權年份
+    init();
+
+  </script>
+</body>
+</html>
