@@ -441,7 +441,7 @@
       background: rgba(0, 0, 0, 0.5);
       z-index: 1000; /* 在側邊欄下方，但在主內容上方 */
       opacity: 0;
-      transition: opacity 0.3s ease, left 0.3s ease;
+      transition: opacity 0.3s ease, left 0.3s ease, clip-path 0.3s ease;
       pointer-events: none;
       -webkit-tap-highlight-color: transparent;
       touch-action: none; /* 防止觸摸事件穿透 */
@@ -474,12 +474,15 @@
     /* 確保側邊欄打開時，遮罩層不會阻擋側邊欄的點擊 */
     .practice-sidebar.menu-open,
     .quiz-sidebar.menu-open {
-      z-index: 1002 !important;
+      z-index: 10000 !important; /* iOS 需要更高的 z-index */
       pointer-events: auto !important;
       touch-action: manipulation; /* 優化觸摸響應 */
       -webkit-touch-callout: none; /* 禁用長按菜單 */
       -webkit-user-select: none; /* 禁用文本選擇 */
       user-select: none;
+      /* iOS 特殊處理 */
+      -webkit-transform: translateZ(0) !important; /* 強制硬體加速 */
+      transform: translateZ(0) !important;
     }
     
     .practice-sidebar.menu-open *,
@@ -550,7 +553,7 @@
         height: calc(100vh - 80px); /* 減去版權資訊高度 */
         max-height: calc(100vh - 80px);
         background: white;
-        z-index: 1002; /* 確保在遮罩層上方 */
+        z-index: 10000 !important; /* iOS 需要更高的 z-index 來確保在遮罩層上方 */
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
         transition: left 0.3s ease;
         border-right: 2px solid #e0e0e0;
@@ -561,11 +564,17 @@
         display: flex;
         flex-direction: column;
         pointer-events: auto !important;
+        /* iOS 特殊處理 */
+        -webkit-transform: translateZ(0); /* 強制硬體加速 */
+        transform: translateZ(0);
+        will-change: left; /* 優化動畫性能 */
       }
       
       /* 確保側邊欄內的所有元素都可以點擊 */
       .practice-sidebar * {
         pointer-events: auto !important;
+        position: relative; /* 確保 z-index 生效 */
+        z-index: 1;
       }
       
       /* 手機版練習目錄側邊欄內容區域布局 */
@@ -629,7 +638,7 @@
         height: calc(100vh - 80px); /* 減去版權資訊高度 */
         max-height: calc(100vh - 80px);
         background: white;
-        z-index: 1002; /* 確保在遮罩層上方 */
+        z-index: 10000 !important; /* iOS 需要更高的 z-index 來確保在遮罩層上方 */
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
         transition: left 0.3s ease;
         border-right: 2px solid #e0e0e0;
@@ -640,11 +649,17 @@
         display: flex;
         flex-direction: column;
         pointer-events: auto !important;
+        /* iOS 特殊處理 */
+        -webkit-transform: translateZ(0); /* 強制硬體加速 */
+        transform: translateZ(0);
+        will-change: left; /* 優化動畫性能 */
       }
       
       /* 確保側邊欄內的所有元素都可以點擊 */
       .quiz-sidebar * {
         pointer-events: auto !important;
+        position: relative; /* 確保 z-index 生效 */
+        z-index: 1;
       }
       
       /* 手機版側邊欄內容區域布局 */
