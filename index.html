@@ -185,11 +185,19 @@
       margin: 10px 0;
       cursor: pointer;
       transition: all 0.2s;
+      pointer-events: auto !important;
+      -webkit-tap-highlight-color: rgba(59, 130, 246, 0.3);
+      touch-action: manipulation;
     }
 
     .practice-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .practice-card:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     /* 密碼輸入區域 */
@@ -205,6 +213,15 @@
       -ms-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
+    }
+    
+    /* 練習選擇畫面中的元素應該可以點擊 */
+    #practice-select-screen .practice-card,
+    #practice-select-screen ion-button,
+    #practice-select-screen .practice-sidebar {
+      pointer-events: auto !important;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     /* 水印樣式 */
@@ -415,7 +432,7 @@
     }
     
     .menu-overlay {
-      display: none; /* 默認隱藏 */
+      display: none !important; /* 默認隱藏 */
       position: fixed;
       top: 0;
       left: 0;
@@ -425,11 +442,13 @@
       z-index: 999;
       opacity: 0;
       transition: opacity 0.3s ease;
+      pointer-events: none;
     }
     
     .menu-overlay.active {
-      display: block;
+      display: block !important;
       opacity: 1;
+      pointer-events: auto;
     }
     
     .mobile-menu-header {
@@ -2263,6 +2282,13 @@
       removeWatermark();
       practiceSelectScreen.classList.remove('hidden');
       
+      // 確保遮罩層關閉（Safari 手機版修復）
+      const overlay = document.getElementById('practice-menu-overlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+        overlay.style.display = 'none';
+      }
+      
       // 動態修改容器樣式以充分利用寬度
       const quizContainer = document.querySelector('.quiz-container');
       if (quizContainer) {
@@ -2350,7 +2376,25 @@
             </div>
           </ion-card-content>
         `;
-        card.onclick = () => selectPractice(practice);
+        
+        // 使用多種方式確保點擊事件在 Safari 手機版也能正常工作
+        const handleCardClick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          selectPractice(practice);
+        };
+        
+        // 同時使用 onclick 和 addEventListener（確保兼容性）
+        card.onclick = handleCardClick;
+        card.addEventListener('click', handleCardClick, { passive: false });
+        card.addEventListener('touchend', handleCardClick, { passive: false });
+        
+        // 確保卡片和內容都可以點擊
+        card.style.pointerEvents = 'auto';
+        card.style.cursor = 'pointer';
+        card.style.userSelect = 'none';
+        card.style.webkitUserSelect = 'none';
+        
         practiceList.appendChild(card);
       });
     }
