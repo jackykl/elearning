@@ -454,16 +454,20 @@
       -webkit-tap-highlight-color: transparent;
     }
     
-    /* 當側邊欄打開時，遮罩層從側邊欄右邊開始，不覆蓋側邊欄 */
+    
+    /* 當側邊欄打開時，使用 clip-path 裁剪遮罩層，使其不覆蓋側邊欄 */
     @media (max-width: 768px) {
-      /* 遮罩層不覆蓋側邊欄的樣式類 */
+      /* 遮罩層不覆蓋側邊欄的樣式類 - 使用 clip-path 裁剪左側 */
       .menu-overlay.sidebar-open {
-        left: 280px; /* 側邊欄寬度 */
+        left: 0; /* 保持原始位置 */
+        clip-path: polygon(280px 0, 100% 0, 100% 100%, 280px 100%); /* 裁剪左側 280px */
+        -webkit-clip-path: polygon(280px 0, 100% 0, 100% 100%, 280px 100%); /* Safari 支持 */
       }
       
       /* 如果側邊欄寬度是 85vw，則遮罩層從 85vw 開始 */
       .menu-overlay.sidebar-open.wide-sidebar {
-        left: 85vw;
+        clip-path: polygon(85vw 0, 100% 0, 100% 100%, 85vw 100%);
+        -webkit-clip-path: polygon(85vw 0, 100% 0, 100% 100%, 85vw 100%);
       }
     }
     
@@ -4798,21 +4802,38 @@
           overlay.style.pointerEvents = 'auto';
           document.body.style.overflow = 'hidden';
           
-          // 在手機版，遮罩層從側邊欄右邊開始
-          // 使用 requestAnimationFrame 確保側邊欄已經渲染
+          // 在手機版，使用 clip-path 裁剪遮罩層，使其不覆蓋側邊欄
+          // 使用雙重 requestAnimationFrame 確保側邊欄已經完全渲染
           requestAnimationFrame(() => {
-            if (window.innerWidth <= 768) {
-              const sidebarWidth = sidebar.offsetWidth || Math.min(280, window.innerWidth * 0.85);
-              overlay.style.left = sidebarWidth + 'px';
-              // 如果側邊欄寬度是 85vw，添加 wide-sidebar 類
-              if (sidebarWidth >= window.innerWidth * 0.85) {
-                overlay.classList.add('wide-sidebar');
+            requestAnimationFrame(() => {
+              if (window.innerWidth <= 768) {
+                // 強制重新計算側邊欄寬度
+                const computedStyle = window.getComputedStyle(sidebar);
+                const sidebarWidth = sidebar.offsetWidth || 
+                                   parseInt(computedStyle.width) || 
+                                   Math.min(280, window.innerWidth * 0.85);
+                
+                // 使用 clip-path 裁剪左側，而不是移動位置
+                overlay.style.left = '0';
+                const clipPathValue = `polygon(${sidebarWidth}px 0, 100% 0, 100% 100%, ${sidebarWidth}px 100%)`;
+                overlay.style.clipPath = clipPathValue;
+                overlay.style.webkitClipPath = clipPathValue;
+                
+                // 如果側邊欄寬度是 85vw，添加 wide-sidebar 類
+                if (sidebarWidth >= window.innerWidth * 0.85) {
+                  overlay.classList.add('wide-sidebar');
+                } else {
+                  overlay.classList.remove('wide-sidebar');
+                }
+                
+                // 調試日誌（可在生產環境移除）
+                console.log('Sidebar width:', sidebarWidth, 'Clip path:', clipPathValue);
               } else {
-                overlay.classList.remove('wide-sidebar');
+                overlay.style.left = '0';
+                overlay.style.clipPath = '';
+                overlay.style.webkitClipPath = '';
               }
-            } else {
-              overlay.style.left = '0';
-            }
+            });
           });
         }
       }
@@ -4829,6 +4850,8 @@
         overlay.style.display = 'none';
         overlay.style.pointerEvents = 'none';
         overlay.style.left = '0'; // 重置位置
+        overlay.style.clipPath = ''; // 重置裁剪
+        overlay.style.webkitClipPath = ''; // 重置裁剪
         document.body.style.overflow = '';
       }
     }
@@ -4857,21 +4880,38 @@
           overlay.style.pointerEvents = 'auto';
           document.body.style.overflow = 'hidden';
           
-          // 在手機版，遮罩層從側邊欄右邊開始
-          // 使用 requestAnimationFrame 確保側邊欄已經渲染
+          // 在手機版，使用 clip-path 裁剪遮罩層，使其不覆蓋側邊欄
+          // 使用雙重 requestAnimationFrame 確保側邊欄已經完全渲染
           requestAnimationFrame(() => {
-            if (window.innerWidth <= 768) {
-              const sidebarWidth = sidebar.offsetWidth || Math.min(280, window.innerWidth * 0.85);
-              overlay.style.left = sidebarWidth + 'px';
-              // 如果側邊欄寬度是 85vw，添加 wide-sidebar 類
-              if (sidebarWidth >= window.innerWidth * 0.85) {
-                overlay.classList.add('wide-sidebar');
+            requestAnimationFrame(() => {
+              if (window.innerWidth <= 768) {
+                // 強制重新計算側邊欄寬度
+                const computedStyle = window.getComputedStyle(sidebar);
+                const sidebarWidth = sidebar.offsetWidth || 
+                                   parseInt(computedStyle.width) || 
+                                   Math.min(280, window.innerWidth * 0.85);
+                
+                // 使用 clip-path 裁剪左側，而不是移動位置
+                overlay.style.left = '0';
+                const clipPathValue = `polygon(${sidebarWidth}px 0, 100% 0, 100% 100%, ${sidebarWidth}px 100%)`;
+                overlay.style.clipPath = clipPathValue;
+                overlay.style.webkitClipPath = clipPathValue;
+                
+                // 如果側邊欄寬度是 85vw，添加 wide-sidebar 類
+                if (sidebarWidth >= window.innerWidth * 0.85) {
+                  overlay.classList.add('wide-sidebar');
+                } else {
+                  overlay.classList.remove('wide-sidebar');
+                }
+                
+                // 調試日誌（可在生產環境移除）
+                console.log('Sidebar width:', sidebarWidth, 'Clip path:', clipPathValue);
               } else {
-                overlay.classList.remove('wide-sidebar');
+                overlay.style.left = '0';
+                overlay.style.clipPath = '';
+                overlay.style.webkitClipPath = '';
               }
-            } else {
-              overlay.style.left = '0';
-            }
+            });
           });
         }
       }
@@ -4888,6 +4928,8 @@
         overlay.style.display = 'none';
         overlay.style.pointerEvents = 'none';
         overlay.style.left = '0'; // 重置位置
+        overlay.style.clipPath = ''; // 重置裁剪
+        overlay.style.webkitClipPath = ''; // 重置裁剪
         document.body.style.overflow = '';
       }
     }
