@@ -439,16 +439,18 @@
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
+      z-index: 1000; /* 在側邊欄下方，但在主內容上方 */
       opacity: 0;
       transition: opacity 0.3s ease;
       pointer-events: none;
+      -webkit-tap-highlight-color: transparent;
     }
     
     .menu-overlay.active {
       display: block !important;
       opacity: 1;
       pointer-events: auto;
+      -webkit-tap-highlight-color: transparent;
     }
     
     .mobile-menu-header {
@@ -487,7 +489,7 @@
         height: calc(100vh - 80px); /* 減去版權資訊高度 */
         max-height: calc(100vh - 80px);
         background: white;
-        z-index: 1000;
+        z-index: 1001; /* 確保在遮罩層上方 */
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
         transition: left 0.3s ease;
         border-right: 2px solid #e0e0e0;
@@ -497,6 +499,7 @@
         margin: 0;
         display: flex;
         flex-direction: column;
+        pointer-events: auto;
       }
       
       /* 手機版練習目錄側邊欄內容區域布局 */
@@ -560,7 +563,7 @@
         height: calc(100vh - 80px); /* 減去版權資訊高度 */
         max-height: calc(100vh - 80px);
         background: white;
-        z-index: 1000;
+        z-index: 1001; /* 確保在遮罩層上方 */
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
         transition: left 0.3s ease;
         border-right: 2px solid #e0e0e0;
@@ -570,6 +573,7 @@
         margin: 0;
         display: flex;
         flex-direction: column;
+        pointer-events: auto;
       }
       
       /* 手機版側邊欄內容區域布局 */
@@ -615,6 +619,18 @@
         padding-left: 15px;
         padding-right: 15px;
         width: 100%;
+        pointer-events: auto;
+      }
+      
+      /* 確保側邊欄關閉時，主內容可以點擊 */
+      .quiz-sidebar:not(.menu-open) ~ .quiz-main,
+      .quiz-layout:not(:has(.quiz-sidebar.menu-open)) .quiz-main {
+        pointer-events: auto;
+      }
+      
+      /* 當側邊欄打開時，遮罩層應該可以點擊關閉 */
+      .quiz-menu-overlay.active {
+        pointer-events: auto !important;
       }
     }
 
@@ -3307,6 +3323,9 @@
         loadingScreen.classList.add('hidden');
         quizScreen.classList.remove('hidden');
         
+        // 確保側邊欄關閉（手機版）
+        closeQuizMenu();
+        
         // 確保容器充分利用寬度
         const quizContainer = document.querySelector('.quiz-container');
         if (quizContainer) {
@@ -3434,6 +3453,9 @@
 
         loadingScreen.classList.add('hidden');
         quizScreen.classList.remove('hidden');
+        
+        // 確保側邊欄關閉（手機版）
+        closeQuizMenu();
         
         // 確保容器充分利用寬度
         const quizContainer = document.querySelector('.quiz-container');
@@ -4690,13 +4712,21 @@
       const sidebar = document.getElementById('practice-sidebar');
       const overlay = document.getElementById('practice-menu-overlay');
       if (sidebar && overlay) {
-        sidebar.classList.toggle('menu-open');
-        overlay.classList.toggle('active');
-        // 防止背景滾動
-        if (sidebar.classList.contains('menu-open')) {
-          document.body.style.overflow = 'hidden';
-        } else {
+        const isOpen = sidebar.classList.contains('menu-open');
+        if (isOpen) {
+          // 關閉
+          sidebar.classList.remove('menu-open');
+          overlay.classList.remove('active');
+          overlay.style.display = 'none';
+          overlay.style.pointerEvents = 'none';
           document.body.style.overflow = '';
+        } else {
+          // 打開
+          sidebar.classList.add('menu-open');
+          overlay.classList.add('active');
+          overlay.style.display = 'block';
+          overlay.style.pointerEvents = 'auto';
+          document.body.style.overflow = 'hidden';
         }
       }
     }
@@ -4707,6 +4737,8 @@
       if (sidebar && overlay) {
         sidebar.classList.remove('menu-open');
         overlay.classList.remove('active');
+        overlay.style.display = 'none';
+        overlay.style.pointerEvents = 'none';
         document.body.style.overflow = '';
       }
     }
@@ -4716,13 +4748,21 @@
       const sidebar = document.getElementById('quiz-sidebar');
       const overlay = document.getElementById('quiz-menu-overlay');
       if (sidebar && overlay) {
-        sidebar.classList.toggle('menu-open');
-        overlay.classList.toggle('active');
-        // 防止背景滾動
-        if (sidebar.classList.contains('menu-open')) {
-          document.body.style.overflow = 'hidden';
-        } else {
+        const isOpen = sidebar.classList.contains('menu-open');
+        if (isOpen) {
+          // 關閉
+          sidebar.classList.remove('menu-open');
+          overlay.classList.remove('active');
+          overlay.style.display = 'none';
+          overlay.style.pointerEvents = 'none';
           document.body.style.overflow = '';
+        } else {
+          // 打開
+          sidebar.classList.add('menu-open');
+          overlay.classList.add('active');
+          overlay.style.display = 'block';
+          overlay.style.pointerEvents = 'auto';
+          document.body.style.overflow = 'hidden';
         }
       }
     }
@@ -4733,6 +4773,8 @@
       if (sidebar && overlay) {
         sidebar.classList.remove('menu-open');
         overlay.classList.remove('active');
+        overlay.style.display = 'none';
+        overlay.style.pointerEvents = 'none';
         document.body.style.overflow = '';
       }
     }
