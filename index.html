@@ -453,6 +453,18 @@
       -webkit-tap-highlight-color: transparent;
     }
     
+    /* 確保側邊欄打開時，遮罩層不會阻擋側邊欄的點擊 */
+    .practice-sidebar.menu-open,
+    .quiz-sidebar.menu-open {
+      z-index: 1002 !important;
+      pointer-events: auto !important;
+    }
+    
+    .practice-sidebar.menu-open *,
+    .quiz-sidebar.menu-open * {
+      pointer-events: auto !important;
+    }
+    
     .mobile-menu-header {
       display: none; /* 默認隱藏，只在手機版顯示 */
       align-items: center;
@@ -489,7 +501,7 @@
         height: calc(100vh - 80px); /* 減去版權資訊高度 */
         max-height: calc(100vh - 80px);
         background: white;
-        z-index: 1001; /* 確保在遮罩層上方 */
+        z-index: 1002; /* 確保在遮罩層上方 */
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
         transition: left 0.3s ease;
         border-right: 2px solid #e0e0e0;
@@ -499,7 +511,12 @@
         margin: 0;
         display: flex;
         flex-direction: column;
-        pointer-events: auto;
+        pointer-events: auto !important;
+      }
+      
+      /* 確保側邊欄內的所有元素都可以點擊 */
+      .practice-sidebar * {
+        pointer-events: auto !important;
       }
       
       /* 手機版練習目錄側邊欄內容區域布局 */
@@ -563,7 +580,7 @@
         height: calc(100vh - 80px); /* 減去版權資訊高度 */
         max-height: calc(100vh - 80px);
         background: white;
-        z-index: 1001; /* 確保在遮罩層上方 */
+        z-index: 1002; /* 確保在遮罩層上方 */
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
         transition: left 0.3s ease;
         border-right: 2px solid #e0e0e0;
@@ -573,7 +590,12 @@
         margin: 0;
         display: flex;
         flex-direction: column;
-        pointer-events: auto;
+        pointer-events: auto !important;
+      }
+      
+      /* 確保側邊欄內的所有元素都可以點擊 */
+      .quiz-sidebar * {
+        pointer-events: auto !important;
       }
       
       /* 手機版側邊欄內容區域布局 */
