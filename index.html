@@ -650,6 +650,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding-left: 20px;
+      padding-right: 40px;
       padding-bottom: 20px; /* 適當的底部間距 */
       height: 100%;
       width: 100%;
@@ -849,6 +850,239 @@
     #quiz-screen .quiz-main {
       overflow-y: auto;
       overflow-x: hidden;
+    }
+    
+    /* Output Prediction 題型樣式 */
+    .output-prediction-container {
+      margin: 20px 0;
+    }
+    
+    .code-display {
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      white-space: pre;
+    }
+    
+    .output-options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .output-option {
+      padding: 12px 15px;
+      background-color: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: move;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    
+    .output-option:hover {
+      background-color: #e9ecef;
+      border-color: #3b82f6;
+    }
+    
+    .output-option.selected {
+      border-color: var(--ion-color-primary);
+      background-color: #eff6ff;
+    }
+    
+    .output-option.correct {
+      border-color: var(--ion-color-success);
+      background-color: #f0fdf4;
+    }
+    
+    .output-option.wrong {
+      border-color: var(--ion-color-danger);
+      background-color: #fef2f2;
+    }
+    
+    .output-sequence {
+      min-height: 100px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border: 2px dashed #cbd5e0;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .output-sequence-item {
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .output-sequence-item .order-number {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: var(--ion-color-primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    
+    .output-sequence-item .output-text {
+      flex: 1;
+    }
+    
+    .output-sequence-item .status-icon {
+      flex-shrink: 0;
+    }
+    
+    /* Parsons Problems 題型樣式 */
+    .parsons-container {
+      margin: 20px 0;
+    }
+    
+    .parsons-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .parsons-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .parsons-bank {
+      min-height: 200px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+    }
+    
+    .parsons-bank h4 {
+      margin: 0 0 15px 0;
+      font-size: 1em;
+      color: #666;
+    }
+    
+    .parsons-target {
+      min-height: 300px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border: 2px dashed #cbd5e0;
+      border-radius: 8px;
+    }
+    
+    .parsons-target h4 {
+      margin: 0 0 15px 0;
+      font-size: 1em;
+      color: #666;
+      padding: 0;
+    }
+    
+    /* 確保排列代碼區域內的代碼行有與左側相同的留白 */
+    .parsons-target .parsons-line {
+      margin-left: 0;
+      margin-right: 0;
+    }
+    
+    .parsons-line {
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      background-color: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: move;
+      transition: all 0.2s;
+      user-select: none;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      white-space: pre;
+    }
+    
+    .parsons-line:hover {
+      background-color: #e9ecef;
+      border-color: #3b82f6;
+    }
+    
+    .parsons-line.dragging {
+      opacity: 0.5;
+    }
+    
+    .parsons-line.placed {
+      background-color: #f0fdf4;
+      border-color: #86efac;
+    }
+    
+    .parsons-line.correct {
+      border-color: var(--ion-color-success);
+      background-color: #f0fdf4;
+    }
+    
+    .parsons-line.wrong {
+      border-color: var(--ion-color-danger);
+      background-color: #fef2f2;
+    }
+    
+    .parsons-line .indent {
+      display: inline-block;
+      width: 20px;
+    }
+    
+    .parsons-line[data-indent="0"] { padding-left: 15px; }
+    .parsons-line[data-indent="1"] { padding-left: 35px; }
+    .parsons-line[data-indent="2"] { padding-left: 55px; }
+    .parsons-line[data-indent="3"] { padding-left: 75px; }
+    .parsons-line[data-indent="4"] { padding-left: 95px; }
+    
+    .parsons-target {
+      min-height: 200px;
+      transition: background-color 0.2s;
+    }
+    
+    .parsons-target.drag-over {
+      background-color: #e0f2fe;
+      border: 2px dashed #3b82f6;
+    }
+    
+    .parsons-target .parsons-line {
+      cursor: grab;
+    }
+    
+    .parsons-target .parsons-line:active {
+      cursor: grabbing;
+    }
+    
+    .parsons-target .parsons-line:hover {
+      background-color: #fee2e2;
+      border-color: var(--ion-color-danger);
+    }
+    
+    .parsons-bank {
+      min-height: 200px;
+    }
+    
+    .parsons-bank .parsons-line {
+      cursor: grab;
+    }
+    
+    .parsons-bank .parsons-line:active {
+      cursor: grabbing;
     }
   </style>
 </head>
@@ -1250,8 +1484,18 @@
         return false;
       });
       
-      // 防止拖拽
+      // 防止拖拽（但允許測驗互動用的拖曳：Output / Parsons）
       document.addEventListener('dragstart', function(e) {
+        if (!e.target) return;
+        const allowedDrag = e.target.closest('.output-options-container') ||
+                            e.target.closest('.output-sequence') ||
+                            e.target.closest('.parsons-bank') ||
+                            e.target.closest('.parsons-target');
+        // 在 Output / Parsons 題型區域內，允許拖曳
+        if (allowedDrag) {
+          return;
+        }
+        // 其他地方一律禁止拖曳（避免拖出題目內容）
         e.preventDefault();
         return false;
       });
@@ -1370,13 +1614,20 @@
     // ==========================================
     let questions = [];
     let currentQIndex = 0;
-    let score = 0;
+    let score = 0; // 最終分數（百分比）
+    let correctCount = 0; // 正確題數
     let selectedOptionIndex = null;
     let isAnswered = false;
     let historyData = [];
     let currentPractice = null; // 當前選擇的練習
     let PASSING_SCORE = 80; // 動態設置
     let currentStudentName = ''; // 當前學生的姓名
+    
+    // 新題型相關變量
+    let selectedOutputs = []; // Output Prediction 題型的選中輸出
+    let draggedOutputIndex = null; // Output 序列中正在拖曳的索引
+    let placedLines = []; // Parsons Problems 題型的已放置代碼行
+    let draggedLine = null; // 當前拖曳的代碼行
 
     // DOM 元素
     const passwordSetupScreen = document.getElementById('password-setup-screen');
@@ -2300,9 +2551,12 @@
         
         // 設置所有必要的變量
         currentStudentName = existingProgress.studentName;
-        currentQIndex = existingProgress.currentQIndex || 0;
+        // 注意：currentQIndex 會在 loadQuestionsAndResume 中根據 historyData 重新計算
+        // 因為題目順序會被打亂，所以不能直接使用舊的 currentQIndex
         historyData = existingProgress.historyData || [];
         score = existingProgress.score || 0;
+        // 從 historyData 計算正確題數
+        correctCount = historyData.filter(h => h && h.isCorrect === true).length;
         
         // 確保使用正確的 CSV URL
         const csvUrl = existingProgress.csvUrl || currentPractice.csvUrl;
@@ -2373,9 +2627,12 @@
         // 詢問是否繼續
         if (confirm(`檢測到未完成的練習「${progress.practiceName}」\n學生：${studentName}\n已答 ${progress.historyData.length} 題\n\n是否繼續？`)) {
           currentStudentName = studentName;
-          currentQIndex = progress.currentQIndex;
+          // 注意：currentQIndex 會在 loadQuestionsAndResume 中根據 historyData 重新計算
+          // 因為題目順序會被打亂，所以不能直接使用舊的 currentQIndex
           historyData = progress.historyData || [];
           score = progress.score || 0;
+          // 從 historyData 計算正確題數
+          correctCount = historyData.filter(h => h && h.isCorrect === true).length;
           hideAllScreens();
           loadingScreen.classList.remove('hidden');
           loadQuestionsAndResume(currentPractice.csvUrl);
@@ -2391,6 +2648,7 @@
       currentQIndex = 0;
       historyData = [];
       score = 0;
+      correctCount = 0;
       errorEl.innerText = '';
       logAccess('practice_start', true, `開始練習: ${currentPractice.name}, 學生: ${studentName}`);
       hideAllScreens();
@@ -2421,6 +2679,170 @@
       resultScreen.classList.add('hidden');
     }
 
+    // 解析 MCQ 題目
+    function parseMCQQuestion(row, dataStartIndex, index) {
+      const questionCol = dataStartIndex;
+      const optionsCol = dataStartIndex + 1;
+      const answerCol = dataStartIndex + 2;
+      const explanationCol = dataStartIndex + 3;
+      
+      // 解析選項：支持多種格式
+      let options = [];
+      
+      // 格式1：選項存儲在一個單元格中，用分隔符分隔（推薦）
+      if (row[optionsCol] && (row[optionsCol].includes('|') || row[optionsCol].includes(';'))) {
+        const separator = row[optionsCol].includes('||') ? '||' : 
+                         row[optionsCol].includes(';;') ? ';;' :
+                         row[optionsCol].includes('|') ? '|' : ';';
+        options = row[optionsCol].split(separator).map(opt => opt.trim()).filter(opt => opt.length > 0);
+      } 
+      // 格式2：選項分別存儲在不同列中（向後兼容）
+      else if (row.length >= optionsCol + 4 && row[optionsCol] && row[optionsCol + 1] && row[optionsCol + 2] && row[optionsCol + 3]) {
+        options = [row[optionsCol], row[optionsCol + 1], row[optionsCol + 2], row[optionsCol + 3]].filter(opt => opt && opt.trim().length > 0);
+      }
+      // 格式3：嘗試用換行符或其他字符分隔
+      else if (row[optionsCol]) {
+        options = row[optionsCol].split(/\n|\r\n|\\n/).map(opt => opt.trim()).filter(opt => opt.length > 0);
+        if (options.length === 1 && row[optionsCol].includes(',')) {
+          options = row[optionsCol].split(',').map(opt => opt.trim()).filter(opt => opt.length > 0);
+        } else if (options.length === 1) {
+          options = [row[optionsCol].trim()];
+        }
+      }
+      
+      if (options.length === 0) {
+        console.warn(`第 ${index + 2} 行：無法解析選項，使用默認值`, row);
+        options = ['選項A', '選項B', '選項C', '選項D'];
+      }
+      
+      // 解析正確答案
+      let correctAnswer = 0;
+      if (row[answerCol]) {
+        const answerValue = parseInt(row[answerCol]);
+        if (!isNaN(answerValue)) {
+          correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
+        }
+      }
+      
+      if (correctAnswer < 0 || correctAnswer >= options.length) {
+        correctAnswer = 0;
+      }
+      
+      // 解析解釋
+      let explanation = '';
+      if (row[explanationCol]) {
+        explanation = row[explanationCol].trim();
+      }
+      
+      return {
+        id: index + 1,
+        type: 'mcq',
+        question: (row[questionCol] || '').trim(),
+        options: options,
+        correctAnswer: correctAnswer,
+        explanation: explanation
+      };
+    }
+    
+    // 解析 Output Prediction 題目
+    function parseOutputQuestion(row, dataStartIndex, index) {
+      const questionCol = dataStartIndex;
+      const codeCol = dataStartIndex + 1;
+      const answerCol = dataStartIndex + 2;
+      const explanationCol = dataStartIndex + 3;
+      
+      // 解析代碼塊（用 | 分隔多行）
+      let codeLines = [];
+      if (row[codeCol]) {
+        const separator = row[codeCol].includes('||') ? '||' : '|';
+        codeLines = row[codeCol].split(separator).map(line => line.trim()).filter(line => line.length > 0);
+      }
+      
+      // 解析正確答案（輸出順序，用 | 分隔）
+      let correctOutputs = [];
+      if (row[answerCol]) {
+        const separator = row[answerCol].includes('||') ? '||' : '|';
+        correctOutputs = row[answerCol].split(separator).map(output => output.trim()).filter(output => output.length > 0);
+      }
+      
+      // 解析解釋
+      let explanation = '';
+      if (row[explanationCol]) {
+        explanation = row[explanationCol].trim();
+      }
+      
+      return {
+        id: index + 1,
+        type: 'output',
+        question: (row[questionCol] || '').trim(),
+        codeLines: codeLines,
+        correctOutputs: correctOutputs,
+        explanation: explanation
+      };
+    }
+    
+    // 解析 Parsons Problems 題目
+    function parseParsonsQuestion(row, dataStartIndex, index) {
+      const questionCol = dataStartIndex;
+      const linesCol = dataStartIndex + 1;
+      const answerCol = dataStartIndex + 2;
+      const explanationCol = dataStartIndex + 3;
+      
+      // 解析代碼行（格式：id:text:indent|id:text:indent|...）
+      let codeLines = [];
+      if (row[linesCol]) {
+        const separator = row[linesCol].includes('||') ? '||' : '|';
+        const lineStrings = row[linesCol].split(separator);
+        
+        codeLines = lineStrings.map((lineStr, idx) => {
+          const parts = lineStr.split(':');
+          if (parts.length >= 2) {
+            const id = parts[0].trim() || `line_${idx}`;
+            const text = parts.slice(1, -1).join(':').trim(); // 處理 text 中可能包含的冒號
+            const indent = parts.length >= 3 ? parseInt(parts[parts.length - 1].trim()) || 0 : 0;
+            
+            return {
+              id: id,
+              text: text,
+              indent: indent
+            };
+          } else {
+            // 向後兼容：如果沒有冒號，整個字符串作為 text，indent 為 0
+            return {
+              id: `line_${idx}`,
+              text: lineStr.trim(),
+              indent: 0
+            };
+          }
+        }).filter(line => line.text && line.text.length > 0);
+      }
+      
+      // 解析正確答案（代碼行的正確順序，用 | 分隔 id）
+      let correctOrder = [];
+      if (row[answerCol]) {
+        const separator = row[answerCol].includes('||') ? '||' : '|';
+        correctOrder = row[answerCol].split(separator).map(id => id.trim()).filter(id => id.length > 0);
+      } else {
+        // 如果沒有提供答案，使用原始順序
+        correctOrder = codeLines.map(line => line.id);
+      }
+      
+      // 解析解釋
+      let explanation = '';
+      if (row[explanationCol]) {
+        explanation = row[explanationCol].trim();
+      }
+      
+      return {
+        id: index + 1,
+        type: 'parsons',
+        question: (row[questionCol] || '').trim(),
+        lines: codeLines,
+        correctOrder: correctOrder,
+        explanation: explanation
+      };
+    }
+
     // 返回練習選擇（從結果畫面或姓名輸入畫面）
     window.backToPracticeSelect = function() {
       // 檢查是否從結果畫面返回
@@ -2434,6 +2856,7 @@
         currentStudentName = '';
         currentQIndex = 0;
         score = 0;
+        correctCount = 0;
         historyData = [];
         console.log('從結果畫面返回，已清除練習相關變量');
       } else {
@@ -2730,6 +3153,40 @@
       }, 100);
     }
 
+    // 打亂題目順序（但保持題目 ID 不變）
+    function shuffleQuestions() {
+      // 使用 Fisher-Yates 洗牌算法
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [questions[i], questions[j]] = [questions[j], questions[i]];
+      }
+    }
+
+    // 根據 historyData 找到當前應該顯示的題目索引
+    // 優先找到最後一題已答題目的下一題，如果都答完了就顯示最後一題
+    function findCurrentQuestionIndex(historyData) {
+      if (!historyData || historyData.length === 0) {
+        return 0; // 沒有答題記錄，從第一題開始
+      }
+
+      // 找到所有已答題目的 questionId
+      const answeredQuestionIds = new Set(
+        historyData
+          .filter(h => h && h.questionId != null)
+          .map(h => h.questionId)
+      );
+
+      // 找到第一個未答題目的索引
+      for (let i = 0; i < questions.length; i++) {
+        if (!answeredQuestionIds.has(questions[i].id)) {
+          return i;
+        }
+      }
+
+      // 如果所有題目都已答完，顯示最後一題
+      return questions.length - 1;
+    }
+
     // 3. 載入題目（新練習）
     async function loadQuestions(csvUrl) {
       try {
@@ -2752,104 +3209,56 @@
 
           questions = dataRows
             .filter(row => {
-              // 至少需要題目和選項
+              // 至少需要題目
               const hasQuestion = row[0] && row[0].trim().length > 0;
-              const hasOptions = row[1] && row[1].trim().length > 0;
-              return hasQuestion && hasOptions;
+              return hasQuestion;
             })
             .map((row, index) => {
-              // 解析選項：支持多種格式
-              let options = [];
-              let parseMethod = '';
+              // 檢測題型：檢查第1列（題型列，如果存在）或根據數據結構推斷
+              // 格式：題型列（可選）| 題目 | 數據列...
+              let questionType = 'mcq'; // 默認是 MCQ
+              let dataStartIndex = 0;
               
-              // 格式1：選項存儲在一個單元格中，用分隔符分隔（推薦）
-              // 支持的分隔符：| 或 ; 或 || 或 ;;
-              if (row[1] && (row[1].includes('|') || row[1].includes(';'))) {
-                // 使用分隔符拆分選項
-                const separator = row[1].includes('||') ? '||' : 
-                                 row[1].includes(';;') ? ';;' :
-                                 row[1].includes('|') ? '|' : ';';
-                options = row[1].split(separator).map(opt => opt.trim()).filter(opt => opt.length > 0);
-                parseMethod = `分隔符格式 (${separator})`;
-              } 
-              // 格式2：選項分別存儲在不同列中（向後兼容）
-              else if (row.length >= 7 && row[1] && row[2] && row[3] && row[4]) {
-                options = [row[1], row[2], row[3], row[4]].filter(opt => opt && opt.trim().length > 0);
-                parseMethod = '多列格式';
+              // 如果第一列是題型標識
+              if (row[0] && (row[0].trim().toLowerCase() === 'mcq' || 
+                             row[0].trim().toLowerCase() === 'output' || 
+                             row[0].trim().toLowerCase() === 'parsons')) {
+                questionType = row[0].trim().toLowerCase();
+                dataStartIndex = 1;
               }
-              // 格式3：只有一個選項列，嘗試用其他分隔符
-              else if (row[1]) {
-                // 嘗試用換行符或其他字符分隔
-                options = row[1].split(/\n|\r\n|\\n/).map(opt => opt.trim()).filter(opt => opt.length > 0);
-                if (options.length > 1) {
-                  parseMethod = '換行符格式';
-                } else if (options.length === 1 && row[1].includes(',')) {
-                  // 如果還是只有一個，嘗試用逗號分隔
-                  options = row[1].split(',').map(opt => opt.trim()).filter(opt => opt.length > 0);
-                  parseMethod = '逗號分隔格式';
-                } else {
-                  // 如果只有一個選項，將其作為單一選項
-                  options = [row[1].trim()];
-                  parseMethod = '單一選項格式';
+              
+              // 如果沒有題型列，根據數據結構推斷
+              if (dataStartIndex === 0) {
+                // 檢查是否為 Parsons Problems（包含代碼行數據）
+                if (row[1] && row[1].includes('|') && row[1].includes(':')) {
+                  // 格式：id:text:indent
+                  const testLine = row[1].split('|')[0];
+                  if (testLine.includes(':') && testLine.split(':').length >= 2) {
+                    questionType = 'parsons';
+                  }
+                }
+                // 檢查是否為 Output Prediction（包含代碼塊）
+                else if (row[1] && (row[1].includes('console.log') || row[1].includes('console.'))) {
+                  questionType = 'output';
                 }
               }
               
-              // 如果還是沒有選項，使用默認值
-              if (options.length === 0) {
-                console.warn(`第 ${index + 2} 行：無法解析選項，使用默認值`, row);
-                options = ['選項A', '選項B', '選項C', '選項D'];
-                parseMethod = '默認值';
+              // 根據題型解析
+              if (questionType === 'parsons') {
+                return parseParsonsQuestion(row, dataStartIndex, index);
+              } else if (questionType === 'output') {
+                return parseOutputQuestion(row, dataStartIndex, index);
+              } else {
+                return parseMCQQuestion(row, dataStartIndex, index);
               }
-              
-              // 調試信息（僅在開發環境顯示）
-              if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
-                console.log(`題目 ${index + 1}: 解析方法=${parseMethod}, 選項數量=${options.length}`, options);
-              }
-              
-              // 解析正確答案
-              // 支持 1-based（1,2,3,4）或 0-based（0,1,2,3）
-              let correctAnswer = 0;
-              if (row.length >= 3 && row[2]) {
-                const answerValue = parseInt(row[2]);
-                if (!isNaN(answerValue)) {
-                  // 如果答案 >= 1，假設是 1-based，需要轉換為 0-based
-                  // 如果答案 = 0，假設已經是 0-based
-                  correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
-                }
-              } else if (row.length >= 6 && row[5]) {
-                // 向後兼容：如果第6列有值，使用它
-                const answerValue = parseInt(row[5]);
-                if (!isNaN(answerValue)) {
-                  correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
-                }
-              }
-              
-              // 確保正確答案在有效範圍內
-              if (correctAnswer < 0 || correctAnswer >= options.length) {
-                correctAnswer = 0;
-              }
-              
-              // 解析解釋（可選）
-              let explanation = '';
-              if (row.length >= 4 && row[3]) {
-                explanation = row[3].trim();
-              } else if (row.length >= 7 && row[6]) {
-                // 向後兼容：如果第7列有值，使用它
-                explanation = row[6].trim();
-              }
-              
-              return {
-                id: index + 1,
-                question: (row[0] || '').trim(),
-                options: options,
-                correctAnswer: correctAnswer,
-                explanation: explanation
-              };
             })
-            .filter(q => q.question && q.question.length > 0); // 過濾掉沒有題目的行
+            .filter(q => q && q.question && q.question.length > 0); // 過濾掉無效題目
         }
 
         if (questions.length === 0) throw new Error("沒有題目資料");
+
+        // 打亂題目順序（但保持題目 ID 不變）
+        shuffleQuestions();
 
         loadingScreen.classList.add('hidden');
         quizScreen.classList.remove('hidden');
@@ -2894,92 +3303,89 @@
           return;
         }
 
-        // 載入題目（與 loadQuestions 相同的邏輯）
+        // 載入題目（與 loadQuestions 相同的邏輯，使用新的題型識別系統）
         if (csvUrl.includes("2PACX-1vR6y2w2J2tO_k-X8tXQy3z5oP5o5z5o5z5o5z5o")) {
+           // 模擬資料
            questions = [
-             { id: 1, question: "（示範題）請更換練習配置中的 CSV 連結", options: ["好", "不好", "連結在哪?", "略過"], correctAnswer: 0, explanation: "請在 PRACTICES 陣列中更新 CSV 連結。" },
-             { id: 2, question: "（示範題）Ionic 是什麼？", options: ["資料庫", "UI Framework", "後端語言", "作業系統"], correctAnswer: 1, explanation: "Ionic 是一個用於建立跨平台 App 的 UI Framework。" }
+             { id: 1, type: 'mcq', question: "（示範題）請更換練習配置中的 CSV 連結", options: ["好", "不好", "連結在哪?", "略過"], correctAnswer: 0, explanation: "請在 PRACTICES 陣列中更新 CSV 連結。" },
+             { id: 2, type: 'mcq', question: "（示範題）Ionic 是什麼？", options: ["資料庫", "UI Framework", "後端語言", "作業系統"], correctAnswer: 1, explanation: "Ionic 是一個用於建立跨平台 App 的 UI Framework。" }
            ];
         } else {
           const response = await fetch(csvUrl);
           if (!response.ok) throw new Error("網路請求失敗");
           const csvText = await response.text();
           const parsedRows = parseCSV(csvText);
-          const dataRows = parsedRows.slice(1);
+          const dataRows = parsedRows.slice(1); // 去除標題
 
           questions = dataRows
             .filter(row => {
+              // 至少需要題目
               const hasQuestion = row[0] && row[0].trim().length > 0;
-              const hasOptions = row[1] && row[1].trim().length > 0;
-              return hasQuestion && hasOptions;
+              return hasQuestion;
             })
             .map((row, index) => {
-              let options = [];
+              // 檢測題型：檢查第1列（題型列，如果存在）或根據數據結構推斷
+              // 格式：題型列（可選）| 題目 | 數據列...
+              let questionType = 'mcq'; // 默認是 MCQ
+              let dataStartIndex = 0;
               
-              if (row[1] && (row[1].includes('|') || row[1].includes(';'))) {
-                const separator = row[1].includes('||') ? '||' : 
-                                 row[1].includes(';;') ? ';;' :
-                                 row[1].includes('|') ? '|' : ';';
-                options = row[1].split(separator).map(opt => opt.trim()).filter(opt => opt.length > 0);
-              } else if (row.length >= 7 && row[1] && row[2] && row[3] && row[4]) {
-                options = [row[1], row[2], row[3], row[4]].filter(opt => opt && opt.trim().length > 0);
-              } else if (row[1]) {
-                options = row[1].split(/\n|\r\n|\\n/).map(opt => opt.trim()).filter(opt => opt.length > 0);
-                if (options.length === 1 && row[1].includes(',')) {
-                  options = row[1].split(',').map(opt => opt.trim()).filter(opt => opt.length > 0);
+              // 如果第一列是題型標識
+              if (row[0] && (row[0].trim().toLowerCase() === 'mcq' || 
+                             row[0].trim().toLowerCase() === 'output' || 
+                             row[0].trim().toLowerCase() === 'parsons')) {
+                questionType = row[0].trim().toLowerCase();
+                dataStartIndex = 1;
+              }
+              
+              // 如果沒有題型列，根據數據結構推斷
+              if (dataStartIndex === 0) {
+                // 檢查是否為 Parsons Problems（包含代碼行數據）
+                if (row[1] && row[1].includes('|') && row[1].includes(':')) {
+                  // 格式：id:text:indent
+                  const testLine = row[1].split('|')[0];
+                  if (testLine.includes(':') && testLine.split(':').length >= 2) {
+                    questionType = 'parsons';
+                  }
+                }
+                // 檢查是否為 Output Prediction（包含代碼塊）
+                else if (row[1] && (row[1].includes('console.log') || row[1].includes('console.'))) {
+                  questionType = 'output';
                 }
               }
               
-              if (options.length === 0) {
-                options = ['選項A', '選項B', '選項C', '選項D'];
+              // 根據題型解析
+              if (questionType === 'parsons') {
+                return parseParsonsQuestion(row, dataStartIndex, index);
+              } else if (questionType === 'output') {
+                return parseOutputQuestion(row, dataStartIndex, index);
+              } else {
+                return parseMCQQuestion(row, dataStartIndex, index);
               }
-              
-              let correctAnswer = 0;
-              if (row.length >= 3 && row[2]) {
-                const answerValue = parseInt(row[2]);
-                if (!isNaN(answerValue)) {
-                  correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
-                }
-              } else if (row.length >= 6 && row[5]) {
-                const answerValue = parseInt(row[5]);
-                if (!isNaN(answerValue)) {
-                  correctAnswer = answerValue >= 1 ? answerValue - 1 : answerValue;
-                }
-              }
-              
-              if (correctAnswer < 0 || correctAnswer >= options.length) {
-                correctAnswer = 0;
-              }
-              
-              let explanation = '';
-              if (row.length >= 4 && row[3]) {
-                explanation = row[3].trim();
-              } else if (row.length >= 7 && row[6]) {
-                explanation = row[6].trim();
-              }
-              
-              return {
-                id: index + 1,
-                question: (row[0] || '').trim(),
-                options: options,
-                correctAnswer: correctAnswer,
-                explanation: explanation
-              };
             })
-            .filter(q => q.question && q.question.length > 0);
+            .filter(q => q && q.question && q.question.length > 0); // 過濾掉無效題目
         }
 
         if (questions.length === 0) throw new Error("沒有題目資料");
 
+        // 打亂題目順序（但保持題目 ID 不變）
+        shuffleQuestions();
+
         // 恢復進度（確保使用進度中的數據，而不是全局變量）
         if (progress) {
-          currentQIndex = progress.currentQIndex || 0;
           historyData = progress.historyData || [];
           score = progress.score || 0;
+          // 從 historyData 計算正確題數
+          correctCount = historyData.filter(h => h && h.isCorrect === true).length;
           // 確保學生姓名正確
           if (progress.studentName && !currentStudentName) {
             currentStudentName = progress.studentName;
           }
+          
+          // 根據 historyData 中的 questionId 來找到當前應該顯示的題目
+          // 而不是使用舊的 currentQIndex（因為順序已經被打亂）
+          currentQIndex = findCurrentQuestionIndex(historyData);
+        } else {
+          currentQIndex = 0;
         }
 
         loadingScreen.classList.add('hidden');
@@ -3025,7 +3431,24 @@
         item.className = 'question-item';
         
         // 檢查這題是否已經答過
-        const answeredHistory = historyData.find(h => h.question === q.question);
+        // 優先使用題目 ID 匹配；只有在沒有 ID 的舊資料時，才使用「完全相同」的題目文字匹配
+        const answeredHistory = historyData.find(h => {
+          if (!h) return false;
+          
+          // 1. 先用題目 ID（最可靠）
+          if (h.questionId != null && q.id != null && h.questionId === q.id) {
+            return true;
+          }
+          
+          // 2. 舊資料備援：僅當沒有 questionId 時，才用「完全相同」的題目文字來當 key
+          if ((h.questionId == null || q.id == null) && h.question && q.question) {
+            const hQuestion = h.question.trim();
+            const qQuestion = q.question.trim();
+            // 僅允許完全相同，不再用 includes，避免一題影響多題
+            return hQuestion === qQuestion;
+          }
+          return false;
+        });
         const isCurrent = index === currentQIndex;
         const isAnswered = !!answeredHistory;
         const isCorrect = answeredHistory ? answeredHistory.isCorrect : false;
@@ -3108,17 +3531,66 @@
       submitBtn.disabled = true;
       nextBtn.classList.add('hidden');
       feedbackArea.classList.add('hidden');
+      feedbackArea.style.display = 'none';
+      feedbackArea.style.borderColor = '';
+      feedbackArea.style.backgroundColor = '';
+      feedbackArea.style.visibility = '';
+      feedbackArea.style.opacity = '';
+      feedbackTitle.innerText = '';
+      feedbackTitle.style.color = '';
+      feedbackText.innerText = '';
+      feedbackText.style.display = '';
+      if (feedbackIcon) {
+        feedbackIcon.name = '';
+        feedbackIcon.color = '';
+      }
       selectedOptionIndex = null;
       isAnswered = false;
+      
+      // 重置新題型的變量
+      selectedOutputs = [];
+      placedLines = [];
+      draggedLine = null;
 
       // 檢查這題是否已經答過（恢復進度時）
+      // 優先使用題目 ID 匹配；只有在沒有 ID 的舊資料時，才使用「完全相同」的題目文字匹配
       const answeredHistory = historyData.find(h => {
-        // 通過題目內容匹配（因為題目ID可能不穩定）
-        return h.question === currentQ.question;
+        if (!h) return false;
+        
+        // 1. 先用題目 ID（最可靠）
+        if (h.questionId != null && currentQ.id != null && h.questionId === currentQ.id) {
+          return true;
+        }
+        
+        // 2. 舊資料備援：僅當沒有 questionId 時，才用「完全相同」的題目文字來當 key
+        if ((h.questionId == null || currentQ.id == null) && h.question && currentQ.question) {
+          const hQuestion = h.question.trim();
+          const qQuestion = currentQ.question.trim();
+          // 僅允許完全相同，不再用 includes，避免「一題正確 → 所有相同題幹都被當作完成」
+          return hQuestion === qQuestion;
+        }
+        
+        return false;
       });
 
-      // 產生選項
+      // 根據題型渲染
       optionsContainer.innerHTML = '';
+      
+      if (currentQ.type === 'output') {
+        renderOutputQuestion(currentQ, answeredHistory);
+      } else if (currentQ.type === 'parsons') {
+        renderParsonsQuestion(currentQ, answeredHistory);
+      } else {
+        // 默認 MCQ 題型
+        renderMCQQuestion(currentQ, answeredHistory);
+      }
+      
+      // 保存進度
+      savePracticeProgress();
+    }
+    
+    // 渲染 MCQ 題目
+    function renderMCQQuestion(currentQ, answeredHistory) {
       currentQ.options.forEach((opt, idx) => {
         const card = document.createElement('ion-card');
         card.className = 'option-card ion-padding';
@@ -3142,7 +3614,9 @@
         const optInnerDiv = document.createElement('div');
         optInnerDiv.style.flex = '1';
         optInnerDiv.style.fontWeight = '500';
-        optInnerDiv.textContent = escapeHtml(opt || '');
+        // 使用 innerHTML 以正確顯示 HTML 實體（如 &lt; 和 &gt;）
+        // 因為已經用 escapeHtml 轉義，所以是安全的
+        optInnerDiv.innerHTML = escapeHtml(opt || '');
         optDiv.appendChild(optInnerDiv);
         card.appendChild(optDiv);
         
@@ -3205,11 +3679,629 @@
         // 如果是最後一題，改按鈕文字
         if (currentQIndex === questions.length - 1) {
           nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+        } else {
+          nextBtn.innerHTML = '下一題 <ion-icon slot="end" name="arrow-forward"></ion-icon>';
         }
       }
       
       // 保存進度
       savePracticeProgress();
+    }
+    
+    // 渲染 Output Prediction 題目
+    function renderOutputQuestion(currentQ, answeredHistory) {
+      const container = document.createElement('div');
+      container.className = 'output-prediction-container';
+      
+      // 顯示代碼
+      const codeDisplay = document.createElement('div');
+      codeDisplay.className = 'code-display';
+      codeDisplay.textContent = currentQ.codeLines.join('\n');
+      container.appendChild(codeDisplay);
+      
+      // 輸出選項區域
+      const optionsArea = document.createElement('div');
+      optionsArea.className = 'output-options-container';
+      optionsArea.id = 'output-options-area';
+      
+      // 創建可選的輸出選項（打亂順序）
+      const shuffledOutputs = [...currentQ.correctOutputs].sort(() => Math.random() - 0.5);
+      shuffledOutputs.forEach((output) => {
+        const option = document.createElement('div');
+        option.className = 'output-option';
+        option.dataset.output = output;
+        option.textContent = output;
+        option.draggable = true;
+        option.ondragstart = (e) => {
+          e.dataTransfer.setData('text/plain', output);
+        };
+        option.onclick = () => selectOutputOption(option, output);
+        optionsArea.appendChild(option);
+      });
+      
+      container.appendChild(optionsArea);
+      
+      // 輸出順序區域
+      const sequenceArea = document.createElement('div');
+      sequenceArea.className = 'output-sequence';
+      sequenceArea.id = 'output-sequence-area';
+      sequenceArea.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">點擊輸出選項添加到序列，或拖曳到此處</p>';
+      sequenceArea.ondrop = (e) => handleOutputDrop(e);
+      sequenceArea.ondragover = (e) => e.preventDefault();
+      container.appendChild(sequenceArea);
+      
+      optionsContainer.appendChild(container);
+      
+      // 如果已經答過，顯示結果
+      if (answeredHistory && answeredHistory.userOutputs) {
+        displayOutputResult(currentQ, answeredHistory.userOutputs, answeredHistory.isCorrect);
+        isAnswered = true;
+        submitBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+        if (currentQIndex === questions.length - 1) {
+          nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+        } else {
+          nextBtn.innerHTML = '下一題 <ion-icon slot="end" name="arrow-forward"></ion-icon>';
+        }
+      } else {
+        // 確保未答題目時，sequenceArea 顯示初始提示
+        const sequenceArea = document.getElementById('output-sequence-area');
+        if (sequenceArea) {
+          sequenceArea.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">點擊輸出選項添加到序列，或拖曳到此處</p>';
+        }
+        // 確保選項可以選擇
+        document.querySelectorAll('.output-option').forEach(opt => {
+          opt.classList.remove('selected');
+          opt.draggable = true;
+          opt.style.cursor = 'pointer';
+        });
+      }
+    }
+    
+    // 渲染 Parsons Problems 題目
+    function renderParsonsQuestion(currentQ, answeredHistory) {
+      const container = document.createElement('div');
+      container.className = 'parsons-container';
+      
+      const layout = document.createElement('div');
+      layout.className = 'parsons-layout';
+      
+      // 左側：代碼庫（打亂順序）
+      const bank = document.createElement('div');
+      bank.className = 'parsons-bank';
+      bank.id = 'parsons-bank';
+      bank.innerHTML = '<h4>代碼片段（拖曳到右側排列）</h4>';
+      
+      const shuffledLines = [...currentQ.lines].sort(() => Math.random() - 0.5);
+      shuffledLines.forEach(line => {
+        const lineEl = document.createElement('div');
+        lineEl.className = 'parsons-line';
+        lineEl.dataset.id = line.id;
+        lineEl.dataset.indent = line.indent;
+        lineEl.setAttribute('data-indent', line.indent);
+        lineEl.textContent = line.text;
+        lineEl.draggable = true;
+        lineEl.ondragstart = (e) => handleParsonsDragStart(e, line);
+        bank.appendChild(lineEl);
+      });
+      
+      layout.appendChild(bank);
+      
+      // 右側：目標區域
+      const target = document.createElement('div');
+      target.className = 'parsons-target';
+      target.id = 'parsons-target';
+      target.innerHTML = '<h4>排列代碼（按執行順序）</h4>';
+      
+      // 改進的 drop 事件處理
+      target.ondrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleParsonsDrop(e);
+      };
+      
+      // 改進的 dragover 事件處理
+      target.ondragover = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // 添加視覺反饋
+        target.classList.add('drag-over');
+      };
+      
+      // 改進的 dragleave 事件處理
+      target.ondragleave = (e) => {
+        // 檢查是否真的離開了 target 區域（而不是進入子元素）
+        const rect = target.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+          target.classList.remove('drag-over');
+        }
+      };
+      
+      // 確保 dragend 時移除樣式
+      document.addEventListener('dragend', () => {
+        target.classList.remove('drag-over');
+      }, true);
+      
+      layout.appendChild(target);
+      
+      container.appendChild(layout);
+      optionsContainer.appendChild(container);
+      
+      // 如果已經答過，顯示結果
+      if (answeredHistory && answeredHistory.userOrder) {
+        displayParsonsResult(currentQ, answeredHistory.userOrder, answeredHistory.isCorrect);
+        isAnswered = true;
+        submitBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+        if (currentQIndex === questions.length - 1) {
+          nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+        } else {
+          nextBtn.innerHTML = '下一題 <ion-icon slot="end" name="arrow-forward"></ion-icon>';
+        }
+      } else {
+        // 確保未答題目時，target 顯示初始提示
+        const target = document.getElementById('parsons-target');
+        if (target) {
+          target.innerHTML = '<h4>排列代碼（按執行順序）</h4>';
+        }
+        // 確保 bank 中的代碼行可以拖曳
+        document.querySelectorAll('#parsons-bank .parsons-line').forEach(el => {
+          el.draggable = true;
+          el.style.cursor = 'grab';
+        });
+      }
+    }
+    
+    // Output Prediction 相關函數
+    function selectOutputOption(optionEl, output) {
+      if (isAnswered) return;
+      
+      // 如果已經在序列中，移除
+      const existingIndex = selectedOutputs.indexOf(output);
+      if (existingIndex >= 0) {
+        selectedOutputs.splice(existingIndex, 1);
+        updateOutputSequence();
+        return;
+      }
+      
+      // 添加到序列
+      selectedOutputs.push(output);
+      optionEl.classList.add('selected');
+      updateOutputSequence();
+      submitBtn.disabled = false;
+    }
+    
+    function updateOutputSequence() {
+      const sequenceArea = document.getElementById('output-sequence-area');
+      if (!sequenceArea) return;
+      
+      sequenceArea.innerHTML = '';
+      
+      if (selectedOutputs.length === 0) {
+        sequenceArea.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">點擊輸出選項添加到序列，或拖曳到此處</p>';
+        return;
+      }
+      
+      selectedOutputs.forEach((output, index) => {
+        const item = document.createElement('div');
+        item.className = 'output-sequence-item';
+        item.setAttribute('data-index', index);
+        item.innerHTML = `
+          <div class="order-number">${index + 1}</div>
+          <div class="output-text">${escapeHtml(output)}</div>
+          <ion-icon class="status-icon" name="close-circle" color="danger" style="cursor: pointer;" onclick="removeOutputItem(${index})"></ion-icon>
+        `;
+        
+        // 允許在序列中拖曳以重新排序（僅在尚未提交答案時）
+        if (!isAnswered) {
+          item.draggable = true;
+          item.ondragstart = (e) => {
+            draggedOutputIndex = index;
+            e.dataTransfer.effectAllowed = 'move';
+          };
+          item.ondragover = (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          };
+          item.ondrop = (e) => {
+            e.preventDefault();
+            if (draggedOutputIndex === null) return;
+            const targetIndex = parseInt(item.getAttribute('data-index'), 10);
+            if (isNaN(targetIndex) || targetIndex === draggedOutputIndex) {
+              draggedOutputIndex = null;
+              return;
+            }
+            const [moved] = selectedOutputs.splice(draggedOutputIndex, 1);
+            selectedOutputs.splice(targetIndex, 0, moved);
+            draggedOutputIndex = null;
+            updateOutputSequence();
+            submitBtn.disabled = selectedOutputs.length === 0;
+          };
+        }
+        
+        sequenceArea.appendChild(item);
+      });
+      
+      // 更新選項區域的選中狀態
+      document.querySelectorAll('.output-option').forEach(opt => {
+        if (selectedOutputs.includes(opt.dataset.output)) {
+          opt.classList.add('selected');
+        } else {
+          opt.classList.remove('selected');
+        }
+      });
+    }
+    
+    window.removeOutputItem = function(index) {
+      if (isAnswered) return;
+      selectedOutputs.splice(index, 1);
+      updateOutputSequence();
+      submitBtn.disabled = selectedOutputs.length === 0;
+    }
+    
+    function handleOutputDrop(e) {
+      e.preventDefault();
+      const output = e.dataTransfer.getData('text/plain');
+      if (output && !selectedOutputs.includes(output)) {
+        selectedOutputs.push(output);
+        updateOutputSequence();
+        submitBtn.disabled = false;
+      }
+    }
+    
+    function displayOutputResult(currentQ, userOutputs, isCorrect) {
+      const sequenceArea = document.getElementById('output-sequence-area');
+      if (!sequenceArea) return;
+      
+      sequenceArea.innerHTML = '';
+      userOutputs.forEach((output, index) => {
+        const isCorrectPos = output === currentQ.correctOutputs[index];
+        const item = document.createElement('div');
+        item.className = `output-sequence-item ${isCorrectPos ? 'correct' : 'wrong'}`;
+        item.innerHTML = `
+          <div class="order-number">${index + 1}</div>
+          <div class="output-text">${escapeHtml(output)}</div>
+          <ion-icon class="status-icon" name="${isCorrectPos ? 'checkmark-circle' : 'close-circle'}" color="${isCorrectPos ? 'success' : 'danger'}"></ion-icon>
+        `;
+        sequenceArea.appendChild(item);
+      });
+      
+      // 標記選項
+      document.querySelectorAll('.output-option').forEach(opt => {
+        opt.classList.remove('selected');
+        opt.draggable = false;
+        opt.style.cursor = 'default';
+      });
+    }
+    
+    // Parsons Problems 相關函數
+    function handleParsonsDragStart(e, line) {
+      if (isAnswered) {
+        e.preventDefault();
+        return;
+      }
+      draggedLine = line;
+      e.dataTransfer.setData('text/plain', line.id);
+      e.dataTransfer.effectAllowed = 'move';
+      // 標記拖曳的元素（可能是文字容器或整個元素）
+      const dragElement = e.target.closest('.parsons-line') || e.target;
+      dragElement.classList.add('dragging');
+    }
+    
+    function handleParsonsDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!draggedLine || isAnswered) return;
+      
+      // 獲取當前題目
+      const currentQ = questions[currentQIndex];
+      if (!currentQ) return;
+      
+      const target = document.getElementById('parsons-target');
+      if (!target) return;
+      
+      // 移除拖曳視覺反饋
+      target.classList.remove('drag-over');
+      
+      // 安全地查找元素：使用轉義的 ID 或直接遍歷元素
+      let lineEl = null;
+      
+      // 方法1：嘗試找到帶有 dragging 類的元素
+      const draggingElements = document.querySelectorAll('.parsons-line.dragging');
+      for (const el of draggingElements) {
+        if (el.dataset.id === draggedLine.id) {
+          lineEl = el;
+          break;
+        }
+      }
+      
+      // 方法2：如果找不到，在 bank 中查找
+      if (!lineEl) {
+        const bankElements = document.querySelectorAll('#parsons-bank .parsons-line');
+        for (const el of bankElements) {
+          if (el.dataset.id === draggedLine.id) {
+            lineEl = el;
+            break;
+          }
+        }
+      }
+      
+      // 方法3：如果還是找不到，在 target 中查找
+      if (!lineEl) {
+        const targetElements = document.querySelectorAll('#parsons-target .parsons-line');
+        for (const el of targetElements) {
+          if (el.dataset.id === draggedLine.id) {
+            lineEl = el;
+            break;
+          }
+        }
+      }
+      
+      if (!lineEl) return;
+      
+      // 檢查是否已經在 target 區域內
+      const isAlreadyPlaced = placedLines.find(l => l.id === draggedLine.id);
+      const isFromBank = lineEl.closest('#parsons-bank');
+      
+      if (isFromBank && !isAlreadyPlaced) {
+        // 從 bank 拖到 target（新增）
+        lineEl.remove();
+        
+        // 添加到 target
+        const newLineEl = createPlacedLineElement(draggedLine);
+        
+        // 計算插入位置 - 改進的邏輯
+        const allPlacedLines = Array.from(target.querySelectorAll('.parsons-line.placed'));
+        let insertBefore = null;
+        
+        // 找到放置位置
+        const dropPoint = e.clientY;
+        const targetRect = target.getBoundingClientRect();
+        
+        // 如果拖曳到 target 區域內
+        if (dropPoint >= targetRect.top && dropPoint <= targetRect.bottom) {
+          // 找到最接近的放置位置
+          for (let i = 0; i < allPlacedLines.length; i++) {
+            const lineRect = allPlacedLines[i].getBoundingClientRect();
+            const lineCenter = lineRect.top + lineRect.height / 2;
+            
+            if (dropPoint < lineCenter) {
+              insertBefore = allPlacedLines[i];
+              break;
+            }
+          }
+        }
+        
+        if (insertBefore) {
+          target.insertBefore(newLineEl, insertBefore);
+        } else {
+          // 拖曳到最後或空白處
+          target.appendChild(newLineEl);
+        }
+        
+        placedLines.push(draggedLine);
+        // 確保 placedLines 順序與 DOM 順序一致
+        const currentOrder = Array.from(target.querySelectorAll('.parsons-line.placed')).map(el => el.dataset.id);
+        placedLines = currentOrder.map(id => currentQ.lines.find(l => l.id === id)).filter(Boolean);
+        submitBtn.disabled = placedLines.length === 0;
+      } else if (isAlreadyPlaced) {
+        // 在 target 區域內重新排序
+        // 使用安全的方法查找元素，避免選擇器錯誤
+        let existingLineEl = null;
+        const targetElements = target.querySelectorAll('.parsons-line.placed');
+        for (const el of targetElements) {
+          if (el.dataset.id === draggedLine.id) {
+            existingLineEl = el;
+            break;
+          }
+        }
+        if (!existingLineEl) return;
+        
+        // 計算新位置
+        const allPlacedLines = Array.from(target.querySelectorAll('.parsons-line.placed'));
+        const currentIndex = allPlacedLines.indexOf(existingLineEl);
+        if (currentIndex === -1) return;
+        
+        // 找到放置位置
+        const dropPoint = e.clientY;
+        let newIndex = allPlacedLines.length - 1;
+        
+        for (let i = 0; i < allPlacedLines.length; i++) {
+          if (allPlacedLines[i] === existingLineEl) continue;
+          
+          const lineRect = allPlacedLines[i].getBoundingClientRect();
+          const lineCenter = lineRect.top + lineRect.height / 2;
+          
+          if (dropPoint < lineCenter) {
+            newIndex = i;
+            break;
+          }
+        }
+        
+        // 如果位置改變了，重新排序
+        if (newIndex !== currentIndex) {
+          existingLineEl.remove();
+          
+          if (newIndex < allPlacedLines.length) {
+            const updatedLines = Array.from(target.querySelectorAll('.parsons-line.placed'));
+            if (updatedLines[newIndex]) {
+              target.insertBefore(existingLineEl, updatedLines[newIndex]);
+            } else {
+              target.appendChild(existingLineEl);
+            }
+          } else {
+            target.appendChild(existingLineEl);
+          }
+          
+          // 更新 placedLines 順序
+          const currentOrder = Array.from(target.querySelectorAll('.parsons-line.placed')).map(el => el.dataset.id);
+          placedLines = currentOrder.map(id => currentQ.lines.find(l => l.id === id)).filter(Boolean);
+        }
+      }
+      
+      draggedLine = null;
+      document.querySelectorAll('.parsons-line').forEach(el => el.classList.remove('dragging'));
+      
+      // 確保移除所有拖曳視覺反饋
+      const targetEl = document.getElementById('parsons-target');
+      if (targetEl) {
+        targetEl.classList.remove('drag-over');
+      }
+    }
+    
+    function createPlacedLineElement(line) {
+      const newLineEl = document.createElement('div');
+      newLineEl.className = 'parsons-line placed';
+      newLineEl.dataset.id = line.id;
+      newLineEl.dataset.indent = line.indent;
+      newLineEl.setAttribute('data-indent', line.indent);
+      
+      // 創建文字內容容器
+      const textContainer = document.createElement('span');
+      textContainer.textContent = line.text;
+      textContainer.style.flex = '1';
+      textContainer.style.userSelect = 'none';
+      textContainer.style.pointerEvents = 'auto';
+      
+      // 創建移除按鈕容器
+      const removeBtnContainer = document.createElement('div');
+      removeBtnContainer.style.flexShrink = '0';
+      removeBtnContainer.style.marginLeft = '10px';
+      removeBtnContainer.style.pointerEvents = 'auto';
+      removeBtnContainer.style.cursor = 'pointer';
+      removeBtnContainer.style.display = 'flex';
+      removeBtnContainer.style.alignItems = 'center';
+      
+      // 創建移除按鈕
+      const removeBtn = document.createElement('ion-icon');
+      removeBtn.name = 'close-circle';
+      removeBtn.color = 'danger';
+      removeBtn.style.fontSize = '20px';
+      removeBtn.style.pointerEvents = 'none';
+      
+      // 移除按鈕事件處理（使用 mousedown 和 click，阻止拖曳）
+      removeBtnContainer.onmousedown = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      };
+      removeBtnContainer.onclick = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        removeParsonsLine(line.id);
+      };
+      removeBtnContainer.ondragstart = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      };
+      
+      removeBtnContainer.appendChild(removeBtn);
+      
+      // 設置 flex 布局
+      newLineEl.style.display = 'flex';
+      newLineEl.style.alignItems = 'center';
+      newLineEl.style.justifyContent = 'space-between';
+      newLineEl.style.cursor = 'grab';
+      
+      newLineEl.appendChild(textContainer);
+      newLineEl.appendChild(removeBtnContainer);
+      
+      // 整個元素可以拖曳（但移除按鈕區域除外）
+      newLineEl.draggable = true;
+      newLineEl.ondragstart = (e) => {
+        // 如果點擊的是移除按鈕，阻止拖曳
+        if (e.target === removeBtn || removeBtnContainer.contains(e.target)) {
+          e.preventDefault();
+          return false;
+        }
+        handleParsonsDragStart(e, line);
+      };
+      newLineEl.ondragover = (e) => {
+        // 如果目標是移除按鈕，不處理
+        if (e.target === removeBtn || removeBtnContainer.contains(e.target)) {
+          return;
+        }
+        e.preventDefault();
+      };
+      newLineEl.ondrop = (e) => {
+        // 如果目標是移除按鈕，不處理
+        if (e.target === removeBtn || removeBtnContainer.contains(e.target)) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        handleParsonsDrop(e);
+      };
+      
+      return newLineEl;
+    }
+    
+    window.removeParsonsLine = function(lineId) {
+      if (isAnswered) return;
+      
+      // 獲取當前題目
+      const currentQ = questions[currentQIndex];
+      if (!currentQ || !currentQ.lines) return;
+      
+      const line = currentQ.lines.find(l => l.id === lineId);
+      if (!line) return;
+      
+      placedLines = placedLines.filter(l => l.id !== lineId);
+      
+      // 從 target 移除（使用安全的方法，避免選擇器錯誤）
+      const target = document.getElementById('parsons-target');
+      if (target) {
+        const targetElements = target.querySelectorAll('.parsons-line.placed');
+        for (const el of targetElements) {
+          if (el.dataset.id === lineId) {
+            el.remove();
+            break;
+          }
+        }
+      }
+      
+      // 添加回 bank
+      const bank = document.getElementById('parsons-bank');
+      const lineEl = document.createElement('div');
+      lineEl.className = 'parsons-line';
+      lineEl.dataset.id = line.id;
+      lineEl.dataset.indent = line.indent;
+      lineEl.setAttribute('data-indent', line.indent);
+      lineEl.textContent = line.text;
+      lineEl.draggable = true;
+      lineEl.ondragstart = (e) => handleParsonsDragStart(e, line);
+      bank.appendChild(lineEl);
+      
+      submitBtn.disabled = placedLines.length === 0;
+    }
+    
+    function displayParsonsResult(currentQ, userOrder, isCorrect) {
+      const target = document.getElementById('parsons-target');
+      if (!target) return;
+      
+      target.innerHTML = '<h4>排列代碼（按執行順序）</h4>';
+      
+      userOrder.forEach((lineId, index) => {
+        const line = currentQ.lines.find(l => l.id === lineId);
+        if (!line) return;
+        
+        const isCorrectPos = lineId === currentQ.correctOrder[index];
+        const lineEl = document.createElement('div');
+        lineEl.className = `parsons-line ${isCorrectPos ? 'correct' : 'wrong'}`;
+        lineEl.dataset.id = line.id;
+        lineEl.dataset.indent = line.indent;
+        lineEl.setAttribute('data-indent', line.indent);
+        lineEl.textContent = line.text;
+        target.appendChild(lineEl);
+      });
+      
+      // 禁用 bank 中的拖曳
+      document.querySelectorAll('#parsons-bank .parsons-line').forEach(el => {
+        el.draggable = false;
+        el.style.cursor = 'default';
+      });
     }
 
     // 5. 選擇選項
@@ -3227,86 +4319,202 @@
 
     // 6. 提交答案
     submitBtn.addEventListener('click', () => {
-      if (selectedOptionIndex === null) return;
+      const currentQ = questions[currentQIndex];
+      let isCorrect = false;
+      let userAnswer = null;
+      
+      // 根據題型處理答案
+      if (currentQ.type === 'output') {
+        if (selectedOutputs.length === 0) return;
+        isCorrect = JSON.stringify(selectedOutputs) === JSON.stringify(currentQ.correctOutputs);
+        userAnswer = selectedOutputs;
+      } else if (currentQ.type === 'parsons') {
+        if (placedLines.length === 0) return;
+        // 從 DOM 中讀取實際的順序，確保與用戶排列的一致
+        const target = document.getElementById('parsons-target');
+        if (!target) return;
+        const actualOrder = Array.from(target.querySelectorAll('.parsons-line.placed')).map(el => el.dataset.id);
+        if (actualOrder.length === 0) return;
+        const userOrder = actualOrder;
+        isCorrect = JSON.stringify(userOrder) === JSON.stringify(currentQ.correctOrder);
+        userAnswer = userOrder;
+      } else {
+        // MCQ 題型
+        if (selectedOptionIndex === null) return;
+        isCorrect = selectedOptionIndex === currentQ.correctAnswer;
+        userAnswer = currentQ.options[selectedOptionIndex];
+      }
       
       isAnswered = true;
-      const currentQ = questions[currentQIndex];
-      const isCorrect = selectedOptionIndex === currentQ.correctAnswer;
-      const cards = document.querySelectorAll('.option-card');
 
-      // 計算分數
-      if (isCorrect) score += (100 / questions.length);
+      // 計算正確題數（用於百分比計算）
+      if (isCorrect) correctCount++;
 
       // 紀錄歷史
-      historyData.push({
+      const historyEntry = {
+        questionId: currentQ.id, // 添加題目 ID 作為主要標識
         question: currentQ.question,
-        userSelect: currentQ.options[selectedOptionIndex],
-        correctSelect: currentQ.options[currentQ.correctAnswer],
+        questionType: currentQ.type,
         isCorrect: isCorrect,
         explanation: currentQ.explanation
-      });
-
-      // 顯示正確/錯誤樣式
-      cards[currentQ.correctAnswer].classList.add('correct'); // 標記正解
-      // 如果選錯了，標記錯誤
-      if (!isCorrect) {
-        cards[selectedOptionIndex].classList.add('wrong');
-      }
-
-      // 確保問題文字仍然可見
-      questionText.style.display = 'block';
-      questionText.style.visibility = 'visible';
-      questionText.style.opacity = '1';
-      const questionCard = questionText.closest('ion-card');
-      if (questionCard) {
-        questionCard.style.display = 'block';
-        questionCard.style.visibility = 'visible';
-        questionCard.style.opacity = '1';
-      }
+      };
       
-      // 顯示解析
-      feedbackArea.classList.remove('hidden');
-      feedbackArea.style.display = 'block'; // 確保顯示
-      
-      if (isCorrect) {
-        feedbackArea.style.borderColor = 'var(--ion-color-success)';
-        feedbackArea.style.backgroundColor = '#f0fdf4';
-        feedbackTitle.innerText = "回答正確";
-        feedbackTitle.style.color = 'var(--ion-color-success)';
-        feedbackIcon.name = "checkmark-circle";
-        feedbackIcon.color = "success";
+      if (currentQ.type === 'output') {
+        historyEntry.userOutputs = userAnswer;
+        historyEntry.correctOutputs = currentQ.correctOutputs;
+      } else if (currentQ.type === 'parsons') {
+        historyEntry.userOrder = userAnswer;
+        historyEntry.correctOrder = currentQ.correctOrder;
       } else {
-        feedbackArea.style.borderColor = 'var(--ion-color-danger)';
-        feedbackArea.style.backgroundColor = '#fef2f2';
-        feedbackTitle.innerText = "回答錯誤";
-        feedbackTitle.style.color = 'var(--ion-color-danger)';
-        feedbackIcon.name = "close-circle";
-        feedbackIcon.color = "danger";
+        historyEntry.userSelect = userAnswer;
+        historyEntry.correctSelect = currentQ.options[currentQ.correctAnswer];
       }
       
-      // 確保解釋文本有內容
-      const explanation = currentQ.explanation || '（此題目暫無詳細解釋）';
-      feedbackText.innerText = explanation;
-      feedbackText.style.display = 'block'; // 確保文本顯示
+      historyData.push(historyEntry);
       
-      // 確保反饋區域可見
-      feedbackArea.style.visibility = 'visible';
-      feedbackArea.style.opacity = '1';
+      // 顯示結果
+      if (currentQ.type === 'output') {
+        displayOutputResult(currentQ, userAnswer, isCorrect);
+        
+        // 顯示解析與按鈕（與 MCQ 題型一致）
+        feedbackArea.classList.remove('hidden');
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+          feedbackArea.style.borderColor = 'var(--ion-color-success)';
+          feedbackArea.style.backgroundColor = '#f0fdf4';
+          feedbackTitle.innerText = "回答正確";
+          feedbackTitle.style.color = 'var(--ion-color-success)';
+          feedbackIcon.name = "checkmark-circle";
+          feedbackIcon.color = "success";
+        } else {
+          feedbackArea.style.borderColor = 'var(--ion-color-danger)';
+          feedbackArea.style.backgroundColor = '#fef2f2';
+          feedbackTitle.innerText = "回答錯誤";
+          feedbackTitle.style.color = 'var(--ion-color-danger)';
+          feedbackIcon.name = "close-circle";
+          feedbackIcon.color = "danger";
+        }
+        const explanation = currentQ.explanation || '（此題目暫無詳細解釋）';
+        feedbackText.innerText = explanation;
+        feedbackText.style.display = 'block';
+        feedbackArea.style.visibility = 'visible';
+        feedbackArea.style.opacity = '1';
+        
+        submitBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+        if (currentQIndex === questions.length - 1) {
+          nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+        } else {
+          nextBtn.innerHTML = '下一題 <ion-icon slot="end" name="arrow-forward"></ion-icon>';
+        }
+        
+        updateQuestionList();
+        savePracticeProgress();
+      } else if (currentQ.type === 'parsons') {
+        displayParsonsResult(currentQ, userAnswer, isCorrect);
+        
+        // 顯示解析與按鈕（與 MCQ 題型一致）
+        feedbackArea.classList.remove('hidden');
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+          feedbackArea.style.borderColor = 'var(--ion-color-success)';
+          feedbackArea.style.backgroundColor = '#f0fdf4';
+          feedbackTitle.innerText = "回答正確";
+          feedbackTitle.style.color = 'var(--ion-color-success)';
+          feedbackIcon.name = "checkmark-circle";
+          feedbackIcon.color = "success";
+        } else {
+          feedbackArea.style.borderColor = 'var(--ion-color-danger)';
+          feedbackArea.style.backgroundColor = '#fef2f2';
+          feedbackTitle.innerText = "回答錯誤";
+          feedbackTitle.style.color = 'var(--ion-color-danger)';
+          feedbackIcon.name = "close-circle";
+          feedbackIcon.color = "danger";
+        }
+        const explanation = currentQ.explanation || '（此題目暫無詳細解釋）';
+        feedbackText.innerText = explanation;
+        feedbackText.style.display = 'block';
+        feedbackArea.style.visibility = 'visible';
+        feedbackArea.style.opacity = '1';
+        
+        submitBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+        if (currentQIndex === questions.length - 1) {
+          nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+        } else {
+          nextBtn.innerHTML = '下一題 <ion-icon slot="end" name="arrow-forward"></ion-icon>';
+        }
+        
+        updateQuestionList();
+        savePracticeProgress();
+      } else {
+        // MCQ 顯示結果
+        const cards = document.querySelectorAll('.option-card');
+        
+        // 顯示正確/錯誤樣式
+        cards[currentQ.correctAnswer].classList.add('correct'); // 標記正解
+        // 如果選錯了，標記錯誤
+        if (!isCorrect) {
+          cards[selectedOptionIndex].classList.add('wrong');
+        }
 
-      // 切換按鈕
-      submitBtn.classList.add('hidden');
-      nextBtn.classList.remove('hidden');
-      
-      // 如果是最後一題，改按鈕文字
-      if (currentQIndex === questions.length - 1) {
-        nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+        // 確保問題文字仍然可見
+        questionText.style.display = 'block';
+        questionText.style.visibility = 'visible';
+        questionText.style.opacity = '1';
+        const questionCard = questionText.closest('ion-card');
+        if (questionCard) {
+          questionCard.style.display = 'block';
+          questionCard.style.visibility = 'visible';
+          questionCard.style.opacity = '1';
+        }
+        
+        // 顯示解析
+        feedbackArea.classList.remove('hidden');
+        feedbackArea.style.display = 'block'; // 確保顯示
+        
+        if (isCorrect) {
+          feedbackArea.style.borderColor = 'var(--ion-color-success)';
+          feedbackArea.style.backgroundColor = '#f0fdf4';
+          feedbackTitle.innerText = "回答正確";
+          feedbackTitle.style.color = 'var(--ion-color-success)';
+          feedbackIcon.name = "checkmark-circle";
+          feedbackIcon.color = "success";
+        } else {
+          feedbackArea.style.borderColor = 'var(--ion-color-danger)';
+          feedbackArea.style.backgroundColor = '#fef2f2';
+          feedbackTitle.innerText = "回答錯誤";
+          feedbackTitle.style.color = 'var(--ion-color-danger)';
+          feedbackIcon.name = "close-circle";
+          feedbackIcon.color = "danger";
+        }
+        
+        // 確保解釋文本有內容
+        const explanation = currentQ.explanation || '（此題目暫無詳細解釋）';
+        feedbackText.innerText = explanation;
+        feedbackText.style.display = 'block'; // 確保文本顯示
+        
+        // 確保反饋區域可見
+        feedbackArea.style.visibility = 'visible';
+        feedbackArea.style.opacity = '1';
+
+        // 切換按鈕
+        submitBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+        
+        // 如果是最後一題，改按鈕文字
+        if (currentQIndex === questions.length - 1) {
+          nextBtn.innerHTML = '查看成績 <ion-icon slot="end" name="trophy"></ion-icon>';
+        } else {
+          nextBtn.innerHTML = '下一題 <ion-icon slot="end" name="arrow-forward"></ion-icon>';
+        }
+        
+        // 更新題目目錄（顯示答題狀態）
+        updateQuestionList();
+        
+        // 保存進度（提交答案時自動保存）
+        savePracticeProgress();
       }
-      
-      // 更新題目目錄（顯示答題狀態）
-      updateQuestionList();
-      
-      // 保存進度（提交答案時自動保存）
-      savePracticeProgress();
     });
 
     // 7. 下一題
@@ -3328,7 +4536,11 @@
       enableContentProtection();
       addWatermark('僅供授權學生使用 - 禁止複製或分享');
 
-      const finalScore = Math.round(score);
+      // 計算百分比分數：正確題數 / 總題數 × 100
+      const totalQuestions = questions.length;
+      const percentageScore = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+      const finalScore = Math.round(percentageScore);
+      score = finalScore; // 更新 score 變量以便保存
       const isPassed = finalScore >= PASSING_SCORE;
       const scoreEl = document.getElementById('final-score');
       const resultMsg = document.getElementById('result-msg');
@@ -3402,6 +4614,7 @@
       
       currentQIndex = 0;
       score = 0;
+      correctCount = 0;
       historyData = [];
       resultScreen.classList.add('hidden');
       quizScreen.classList.remove('hidden');
@@ -3486,4 +4699,5 @@
 
   </script>
 </body>
+</html>
 </html>
