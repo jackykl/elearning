@@ -441,9 +441,10 @@
       background: rgba(0, 0, 0, 0.5);
       z-index: 1000; /* 在側邊欄下方，但在主內容上方 */
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease, left 0.3s ease;
       pointer-events: none;
       -webkit-tap-highlight-color: transparent;
+      touch-action: none; /* 防止觸摸事件穿透 */
     }
     
     .menu-overlay.active {
@@ -453,16 +454,60 @@
       -webkit-tap-highlight-color: transparent;
     }
     
+    /* 當側邊欄打開時，遮罩層從側邊欄右邊開始，不覆蓋側邊欄 */
+    @media (max-width: 768px) {
+      /* 遮罩層不覆蓋側邊欄的樣式類 */
+      .menu-overlay.sidebar-open {
+        left: 280px; /* 側邊欄寬度 */
+      }
+      
+      /* 如果側邊欄寬度是 85vw，則遮罩層從 85vw 開始 */
+      .menu-overlay.sidebar-open.wide-sidebar {
+        left: 85vw;
+      }
+    }
+    
     /* 確保側邊欄打開時，遮罩層不會阻擋側邊欄的點擊 */
     .practice-sidebar.menu-open,
     .quiz-sidebar.menu-open {
       z-index: 1002 !important;
       pointer-events: auto !important;
+      touch-action: manipulation; /* 優化觸摸響應 */
+      -webkit-touch-callout: none; /* 禁用長按菜單 */
+      -webkit-user-select: none; /* 禁用文本選擇 */
+      user-select: none;
     }
     
     .practice-sidebar.menu-open *,
     .quiz-sidebar.menu-open * {
       pointer-events: auto !important;
+      touch-action: manipulation; /* 優化觸摸響應 */
+      -webkit-touch-callout: none; /* 禁用長按菜單 */
+    }
+    
+    /* 確保側邊欄內的按鈕和鏈接可以點擊 */
+    .practice-sidebar.menu-open .practice-card,
+    .quiz-sidebar.menu-open .question-item {
+      pointer-events: auto !important;
+      touch-action: manipulation !important;
+      -webkit-tap-highlight-color: rgba(0, 123, 255, 0.3);
+      cursor: pointer;
+      position: relative; /* 確保 z-index 生效 */
+      z-index: 1;
+    }
+    
+    /* iPhone Safari 特殊優化 */
+    @supports (-webkit-touch-callout: none) {
+      .practice-sidebar.menu-open,
+      .quiz-sidebar.menu-open {
+        -webkit-overflow-scrolling: touch; /* 平滑滾動 */
+      }
+      
+      .practice-sidebar.menu-open .practice-card,
+      .quiz-sidebar.menu-open .question-item {
+        -webkit-tap-highlight-color: rgba(0, 123, 255, 0.5);
+        -webkit-touch-callout: none;
+      }
     }
     
     .mobile-menu-header {
@@ -4739,16 +4784,36 @@
           // 關閉
           sidebar.classList.remove('menu-open');
           overlay.classList.remove('active');
+          overlay.classList.remove('sidebar-open');
           overlay.style.display = 'none';
           overlay.style.pointerEvents = 'none';
+          overlay.style.left = '0'; // 重置位置
           document.body.style.overflow = '';
         } else {
           // 打開
           sidebar.classList.add('menu-open');
           overlay.classList.add('active');
+          overlay.classList.add('sidebar-open');
           overlay.style.display = 'block';
           overlay.style.pointerEvents = 'auto';
           document.body.style.overflow = 'hidden';
+          
+          // 在手機版，遮罩層從側邊欄右邊開始
+          // 使用 requestAnimationFrame 確保側邊欄已經渲染
+          requestAnimationFrame(() => {
+            if (window.innerWidth <= 768) {
+              const sidebarWidth = sidebar.offsetWidth || Math.min(280, window.innerWidth * 0.85);
+              overlay.style.left = sidebarWidth + 'px';
+              // 如果側邊欄寬度是 85vw，添加 wide-sidebar 類
+              if (sidebarWidth >= window.innerWidth * 0.85) {
+                overlay.classList.add('wide-sidebar');
+              } else {
+                overlay.classList.remove('wide-sidebar');
+              }
+            } else {
+              overlay.style.left = '0';
+            }
+          });
         }
       }
     }
@@ -4759,8 +4824,11 @@
       if (sidebar && overlay) {
         sidebar.classList.remove('menu-open');
         overlay.classList.remove('active');
+        overlay.classList.remove('sidebar-open');
+        overlay.classList.remove('wide-sidebar');
         overlay.style.display = 'none';
         overlay.style.pointerEvents = 'none';
+        overlay.style.left = '0'; // 重置位置
         document.body.style.overflow = '';
       }
     }
@@ -4775,16 +4843,36 @@
           // 關閉
           sidebar.classList.remove('menu-open');
           overlay.classList.remove('active');
+          overlay.classList.remove('sidebar-open');
           overlay.style.display = 'none';
           overlay.style.pointerEvents = 'none';
+          overlay.style.left = '0'; // 重置位置
           document.body.style.overflow = '';
         } else {
           // 打開
           sidebar.classList.add('menu-open');
           overlay.classList.add('active');
+          overlay.classList.add('sidebar-open');
           overlay.style.display = 'block';
           overlay.style.pointerEvents = 'auto';
           document.body.style.overflow = 'hidden';
+          
+          // 在手機版，遮罩層從側邊欄右邊開始
+          // 使用 requestAnimationFrame 確保側邊欄已經渲染
+          requestAnimationFrame(() => {
+            if (window.innerWidth <= 768) {
+              const sidebarWidth = sidebar.offsetWidth || Math.min(280, window.innerWidth * 0.85);
+              overlay.style.left = sidebarWidth + 'px';
+              // 如果側邊欄寬度是 85vw，添加 wide-sidebar 類
+              if (sidebarWidth >= window.innerWidth * 0.85) {
+                overlay.classList.add('wide-sidebar');
+              } else {
+                overlay.classList.remove('wide-sidebar');
+              }
+            } else {
+              overlay.style.left = '0';
+            }
+          });
         }
       }
     }
@@ -4795,8 +4883,11 @@
       if (sidebar && overlay) {
         sidebar.classList.remove('menu-open');
         overlay.classList.remove('active');
+        overlay.classList.remove('sidebar-open');
+        overlay.classList.remove('wide-sidebar');
         overlay.style.display = 'none';
         overlay.style.pointerEvents = 'none';
+        overlay.style.left = '0'; // 重置位置
         document.body.style.overflow = '';
       }
     }
