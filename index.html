@@ -215,6 +215,38 @@
       -webkit-touch-callout: none;
     }
     
+    /* 允許在導出/導入對話框中選擇和複製文本 */
+    #export-textarea,
+    #import-textarea,
+    #temp-export-textarea {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+      -webkit-touch-callout: default !important;
+    }
+    
+    /* 確保導出/導入對話框不受內容保護影響 */
+    .progress-dialog {
+      pointer-events: auto !important;
+    }
+    
+    .progress-dialog * {
+      pointer-events: auto !important;
+    }
+    
+    /* 確保導出/導入對話框中的按鈕可以點擊 */
+    #export-close-btn,
+    #import-cancel-btn,
+    #import-confirm-btn {
+      pointer-events: auto !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      touch-action: manipulation !important;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
+      cursor: pointer !important;
+    }
+    
     /* 練習選擇畫面中的元素應該可以點擊 */
     #practice-select-screen .practice-card,
     #practice-select-screen ion-button,
@@ -1339,6 +1371,10 @@
                 <ion-button expand="block" size="large" class="ion-margin-top" onclick="startPracticeWithName()">
                   開始練習
                 </ion-button>
+                <ion-button expand="block" fill="outline" size="small" class="ion-margin-top" onclick="importProgressFromNameScreen()">
+                  <ion-icon slot="start" name="upload"></ion-icon>
+                  導入進度
+                </ion-button>
                 <ion-button expand="block" fill="outline" size="small" class="ion-margin-top" onclick="backToPracticeSelect()">
                   返回練習選擇
                 </ion-button>
@@ -1387,6 +1423,16 @@
                 <ion-button size="small" fill="outline" expand="block" onclick="backToPracticeSelectFromQuiz()">
                   <ion-icon slot="start" name="arrow-back"></ion-icon>
                   返回練習目錄
+                </ion-button>
+              </div>
+              <div style="margin-bottom: 15px; flex-shrink: 0; display: flex; gap: 8px; flex-direction: column;">
+                <ion-button size="small" fill="outline" expand="block" onclick="exportProgress()">
+                  <ion-icon slot="start" name="download"></ion-icon>
+                  導出進度
+                </ion-button>
+                <ion-button size="small" fill="outline" expand="block" onclick="importProgress()">
+                  <ion-icon slot="start" name="upload"></ion-icon>
+                  導入進度
                 </ion-button>
               </div>
               <div id="question-list">
@@ -1598,11 +1644,47 @@
       document.body.classList.add('no-select');
       document.body.classList.add('protected-content');
       
-      // 防止複製
+      // 防止複製（但允許在導出/導入對話框中複製）
       document.addEventListener('copy', function(e) {
+        // 檢查是否在導出/導入對話框中的 textarea 或臨時 textarea
+        const target = e.target;
+        if (target && (
+          target.id === 'export-textarea' || 
+          target.id === 'import-textarea' ||
+          target.id === 'temp-export-textarea' ||
+          target.closest('#export-textarea') ||
+          target.closest('#import-textarea') ||
+          target.closest('#temp-export-textarea')
+        )) {
+          // 允許複製
+          return true;
+        }
+        // 其他地方禁止複製
         e.clipboardData.setData('text/plain', '');
         e.preventDefault();
         return false;
+      });
+      
+      // 允許在導出/導入對話框中粘貼
+      document.addEventListener('paste', function(e) {
+        // 檢查是否在導出/導入對話框中的 textarea
+        const target = e.target;
+        if (target && (
+          target.id === 'export-textarea' || 
+          target.id === 'import-textarea' ||
+          target.closest('#export-textarea') ||
+          target.closest('#import-textarea')
+        )) {
+          // 允許粘貼
+          return true;
+        }
+        // 其他地方禁止粘貼（但允許在測驗內容區域外粘貼，如地址欄等）
+        // 注意：這裡只阻止在測驗內容區域內的粘貼
+        if (target && target.closest('.protected-content')) {
+          e.preventDefault();
+          return false;
+        }
+        return true;
       });
       
       // 防止拖拽（但允許測驗互動用的拖曳：Output / Parsons）
@@ -3622,10 +3704,19 @@
           statusIcon = isCorrect ? ' ✓' : ' ✗';
         }
         
+        // 根據題型添加說明
+        let typeLabel = '';
+        if (q.type === 'mcq') {
+          typeLabel = ' (多項選擇題)';
+        } else if (q.type === 'output') {
+          typeLabel = ' (輸出預測題)';
+        } else if (q.type === 'parsons') {
+          typeLabel = ' (邏輯排序題)';
+        }
+        
         item.innerHTML = `
           <div style="display: flex; align-items: center;">
-            <span class="question-item-number">${index + 1}.</span>
-            <span style="flex: 1; font-size: 0.9em;">題目 ${index + 1}${statusIcon}</span>
+            <span style="flex: 1; font-size: 0.9em;">題目 ${index + 1}${typeLabel}${statusIcon}</span>
           </div>
         `;
         
@@ -4948,6 +5039,292 @@
         document.body.style.overflow = '';
       }
     }
+
+    // 導出進度功能
+    window.exportProgress = function() {
+      if (!currentPractice || !currentStudentName) {
+        alert('目前沒有進行中的練習，無法導出進度。');
+        return;
+      }
+
+      try {
+        // 獲取當前練習的進度
+        const progress = loadPracticeProgress(currentPractice.id, currentStudentName);
+        
+        if (!progress) {
+          alert('目前沒有可導出的進度。');
+          return;
+        }
+
+        // 創建導出數據（包含所有必要信息）
+        const exportData = {
+          version: '1.0',
+          exportTime: new Date().toISOString(),
+          progress: progress
+        };
+
+        // 轉換為 JSON 字符串
+        const jsonString = JSON.stringify(exportData, null, 2);
+
+        // 創建臨時文本區域來複製文本
+        const textarea = document.createElement('textarea');
+        textarea.id = 'temp-export-textarea'; // 添加 ID 以便識別
+        textarea.value = jsonString;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        textarea.style.pointerEvents = 'none'; // 防止干擾
+        // 允許文本選擇（覆蓋內容保護）
+        textarea.style.userSelect = 'text';
+        textarea.style.webkitUserSelect = 'text';
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, 99999); // 移動端支持
+
+        try {
+          // 嘗試複製到剪貼板
+          const successful = document.execCommand('copy');
+          if (successful) {
+            alert('進度以文字的方式複製到剪貼板！\n\n請將此進度記錄儲存到您的個人設備（如手機、郵箱、雲端硬碟等），以便下次使用時導入。\n\n提示：您可以將文字儲存到記事本、郵件草稿或任何文本編輯器中。');
+          } else {
+            // 如果複製失敗，顯示文本讓用戶手動複製
+            showExportDialog(jsonString);
+          }
+        } catch (err) {
+          // 如果 execCommand 不支持，顯示文本讓用戶手動複製
+          showExportDialog(jsonString);
+        }
+
+        document.body.removeChild(textarea);
+      } catch (error) {
+        console.error('導出進度失敗:', error);
+        alert('導出進度時發生錯誤：' + error.message);
+      }
+    };
+
+    // 顯示導出對話框（當自動複製失敗時）
+    function showExportDialog(jsonString) {
+      // 創建模態對話框
+      const dialog = document.createElement('div');
+      dialog.className = 'progress-dialog';
+      dialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        pointer-events: auto !important;
+      `;
+
+      const content = document.createElement('div');
+      content.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 90%;
+        max-height: 80vh;
+        overflow: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      `;
+
+      content.innerHTML = `
+        <h3 style="margin-top: 0;">請複製以下JSON文字內容並儲存到您的個人設備</h3>
+        <textarea id="export-textarea" style="width: 100%; height: 300px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; box-sizing: border-box;"></textarea>
+        <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="export-close-btn" style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; pointer-events: auto;">關閉</button>
+        </div>
+      `;
+
+      dialog.appendChild(content);
+      document.body.appendChild(dialog);
+
+      // 點擊背景關閉對話框
+      dialog.addEventListener('click', function(e) {
+        if (e.target === dialog) {
+          dialog.remove();
+        }
+      });
+
+      // 關閉按鈕事件
+      const closeBtn = content.querySelector('#export-close-btn');
+      closeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dialog.remove();
+      });
+      // 也支持觸摸事件（移動端）
+      closeBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dialog.remove();
+      });
+
+      // 設置 textarea 的值（直接設置，不需要轉義）
+      const textarea = content.querySelector('#export-textarea');
+      if (textarea) {
+        textarea.value = jsonString;
+        // 自動選中文本
+        setTimeout(() => {
+          textarea.select();
+          textarea.setSelectionRange(0, 99999);
+        }, 100);
+      }
+    }
+
+    // 導入進度功能
+    window.importProgress = function() {
+      // 創建模態對話框
+      const dialog = document.createElement('div');
+      dialog.className = 'progress-dialog';
+      dialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        pointer-events: auto !important;
+      `;
+
+      const content = document.createElement('div');
+      content.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 90%;
+        max-height: 80vh;
+        overflow: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      `;
+
+      content.innerHTML = `
+        <h3 style="margin-top: 0;">導入進度</h3>
+        <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">請貼上之前導出的進度文字：</p>
+        <textarea id="import-textarea" placeholder="請在此處貼上進度文字..." style="width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; box-sizing: border-box;"></textarea>
+        <p id="import-error" style="color: var(--ion-color-danger); font-size: 0.9em; margin-top: 10px; min-height: 1.5em;"></p>
+        <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="import-cancel-btn" style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; pointer-events: auto;">取消</button>
+          <button id="import-confirm-btn" style="padding: 8px 16px; border: none; background: var(--ion-color-primary); color: white; border-radius: 4px; cursor: pointer; pointer-events: auto;">導入</button>
+        </div>
+      `;
+
+      dialog.appendChild(content);
+      document.body.appendChild(dialog);
+
+      // 點擊背景關閉對話框
+      dialog.addEventListener('click', function(e) {
+        if (e.target === dialog) {
+          dialog.remove();
+        }
+      });
+
+      // 取消按鈕事件
+      const cancelBtn = content.querySelector('#import-cancel-btn');
+      cancelBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dialog.remove();
+      });
+      // 也支持觸摸事件（移動端）
+      cancelBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dialog.remove();
+      });
+
+      // 導入確認按鈕事件
+      const confirmBtn = content.querySelector('#import-confirm-btn');
+      const errorEl = content.querySelector('#import-error');
+      const textarea = content.querySelector('#import-textarea');
+
+      confirmBtn.onclick = function() {
+        const importText = textarea.value.trim();
+        if (!importText) {
+          errorEl.textContent = '請輸入進度文本。';
+          return;
+        }
+
+        try {
+          // 解析 JSON
+          const importData = JSON.parse(importText);
+
+          // 驗證數據格式
+          if (!importData.progress) {
+            throw new Error('進度數據格式錯誤：缺少 progress 字段');
+          }
+
+          const progress = importData.progress;
+
+          // 驗證必要字段
+          if (!progress.practiceId || !progress.studentName || !progress.csvUrl) {
+            throw new Error('進度數據不完整：缺少必要字段');
+          }
+
+          // 檢查課程編號是否匹配
+          const currentCourseCode = getCurrentCourseCode();
+          if (progress.courseCode && progress.courseCode !== currentCourseCode) {
+            if (!confirm(`警告：導入的進度來自課程編號「${progress.courseCode}」，而當前登入的課程編號是「${currentCourseCode}」。\n\n是否仍要導入？`)) {
+              return;
+            }
+          }
+
+          // 保存進度到 localStorage
+          const allProgress = getAllPracticeProgress();
+          const progressKey = getProgressKey(progress.practiceId, progress.studentName);
+          allProgress[progressKey] = progress;
+          localStorage.setItem(PRACTICE_PROGRESS_KEY, JSON.stringify(allProgress));
+
+          // 關閉對話框
+          dialog.remove();
+
+          // 提示成功
+          alert(`進度導入成功！\n\n練習：${progress.practiceName}\n學生：${progress.studentName}\n已答題數：${progress.historyData ? progress.historyData.length : 0}\n\n請返回練習目錄，選擇對應的練習繼續。`);
+
+          // 如果當前正在進行同一個練習，重新載入
+          if (currentPractice && currentPractice.id === progress.practiceId && currentStudentName === progress.studentName) {
+            if (confirm('檢測到您正在進行此練習，是否立即恢復進度？')) {
+              // 恢復進度
+              currentStudentName = progress.studentName;
+              historyData = progress.historyData || [];
+              score = progress.score || 0;
+              correctCount = historyData.filter(h => h && h.isCorrect === true).length;
+              
+              // 重新載入題目
+              hideAllScreens();
+              loadingScreen.classList.remove('hidden');
+              loadQuestionsAndResume(progress.csvUrl);
+            }
+          }
+        } catch (error) {
+          console.error('導入進度失敗:', error);
+          errorEl.textContent = '導入失敗：' + error.message;
+        }
+      };
+
+      // 自動聚焦到文本區域
+      setTimeout(() => {
+        textarea.focus();
+      }, 100);
+    };
+
+    // 從姓名輸入畫面導入進度
+    window.importProgressFromNameScreen = function() {
+      // 先導入進度
+      window.importProgress();
+      
+      // 導入成功後，如果檢測到進度，會自動恢復
+      // 這裡不需要額外處理，因為 importProgress 函數已經處理了
+    };
 
     // 啟動程式
     updateCopyrightYear(); // 先更新版權年份
